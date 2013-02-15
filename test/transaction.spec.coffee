@@ -24,6 +24,54 @@ clean = (collection) ->
         def.promise
     )
 
+# ----------------------------------------------------------------------------------------------------
+
+# Create a user.
+addUser = (user_id) ->
+    def = Q.defer()
+    request
+        'method': 'POST'
+        'url': url + '/api/users'
+        'json':
+            'id':      user_id
+            'api_key': 'key:'  + user_id
+    , (err, res, body) ->
+        if err then def.reject err
+        if res.statusCode isnt 200 then def.reject body.message
+        def.resolve()
+    def.promise
+
+addAccount = (user_id, account) ->
+    def = Q.defer()
+    request
+        'method': 'POST'
+        'url': url + '/api/accounts'
+        'json': account
+        'headers':
+            'x-apikey': 'key:' + user_id
+    , (err, res, body) ->
+        if err then def.reject err
+        if res.statusCode isnt 200 then def.reject body.message
+        def.resolve()
+    def.promise
+
+addTransaction = (user_id, transactions) ->
+    def = Q.defer()
+    request
+        'method': 'POST'
+        'url': url + '/api/transactions'
+        'json':
+            'transactions': transactions
+        'headers':
+            'x-apikey': 'key:' + user_id
+    , (err, res, body) ->
+        if err then def.reject err
+        if res.statusCode isnt 200 then def.reject body.message
+        def.resolve()
+    def.promise
+
+# ----------------------------------------------------------------------------------------------------
+
 describe 'Ledger', ->
 
     before (done) ->
@@ -36,56 +84,22 @@ describe 'Ledger', ->
             
             # Create user.
             Q.fcall( ->
-                def = Q.defer()
-                request
-                    'method': 'POST'
-                    'url': url + '/api/users'
-                    'json':
-                        'id':      'user:radek'
-                        'api_key': '@dummy!'
-                , (err, res, body) ->
-                    if err then def.reject err
-                    if res.statusCode isnt 200 then def.reject body.message
-                    def.resolve()
-                def.promise
+                addUser 'user:radek'
             
             # Create an account for the user.
             ).then( ->
-                def = Q.defer()
-                request
-                    'method': 'POST'
-                    'url': url + '/api/accounts'
-                    'json':
-                        'id':   'hsbc'
-                        'type': 102
-                    'headers':
-                        'x-apikey': '@dummy!'
-                , (err, res, body) ->
-                    if err then def.reject err
-                    if res.statusCode isnt 200 then def.reject body.message
-                    def.resolve()
-                def.promise
+                addAccount 'user:radek',
+                    'id':   'hsbc'
+                    'type': 102
 
             # Post a new transaction.
             ).then( ->
-                def = Q.defer()
-                request
-                    'method': 'POST'
-                    'url': url + '/api/transactions'
-                    'json':
-                        'transactions':
-                            'user:radek': [
-                                {
-                                    'amount':      -10.00
-                                    'account_id':  'hsbc'
-                                    'description': 'Apple'
-                                }
-                            ]
-                    'headers':
-                        'x-apikey': '@dummy!'
-                , (err, res, body) ->
-                    if err then def.reject err
-                    if res.statusCode isnt 200 then def.reject body.message
-                    def.resolve()
-                def.promise
+                addTransaction 'user:radek',
+                    'user:radek': [
+                        {
+                            'amount':      -10.00
+                            'account_id':  'hsbc'
+                            'description': 'Apple'
+                        }
+                    ]
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
