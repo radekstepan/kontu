@@ -1,11 +1,11 @@
-expect         = require('chai').expect
-Q              = require 'q'
+expect          = require('chai').expect
+Q               = require 'q'
 
-{ start }      = require '../service.coffee'
-{ NodeClient } = require '../node-client.coffee'
+{ start }       = require '../index'
+{ KontuClient } = require '../kontu-client.coffee'
 
 # New client.
-client         = new NodeClient 'http://127.0.0.1:2120'
+client          = new KontuClient 'http://127.0.0.1:2120'
 
 # Cleanup the collection in the database.
 clean = (collection) ->
@@ -44,14 +44,67 @@ genericise = (obj) ->
 
 # ----------------------------------------------------------------------------------------------------
 
-describe 'Ledger', ->
+describe 'Transactions', ->
+
+    APP = null
 
     before (done) ->
-        start 2120, (app) ->
-            app.db (collections) ->
-                Q.all([ clean(collections.users), clean(collections.ledger) ]).done(( -> done() ), done)
+        start 2120, (app) -> APP = app ; done()
 
-    describe 'add transaction on an account', ->
+    beforeEach (done) ->
+        APP.db (collections) ->
+            Q.all([ clean(collections.users), clean(collections.ledger) ]).done(( -> done() ), done)
+
+    describe 'add a simple transaction', ->
+        it 'should update the balance', (done) ->
+            
+            # Create user.
+            Q.fcall( ->
+                client.addUser 'user:radek'
+            
+            # Create an account for the user.
+            ).then( ->
+                client.addAccount 'user:radek',
+                    'id':   'hsbc'
+                    'type': 102
+
+            # Post a new transaction.
+            ).then( ->
+                client.addTransaction 'user:radek',
+                    'created': (new Date()).getTime()
+                    'transfers':
+                        'user:radek': [
+                            {
+                                'amount':      -10.00
+                                'account_id':  'hsbc'
+                                'description': 'Apple'
+                            }
+                        ]
+
+            # Get a list of transactions for a user.
+            ).then( ->
+                client.getTransactions('user:radek').then( (results) ->
+                    # Does the response match?
+                    expect(genericise results).to.deep.equal
+                        'accounts':
+                            'hsbc': -10
+                        'transactions': [
+                            {
+                                'transfers':
+                                    'user:radek': [
+                                        {
+                                            'amount':      -10.00
+                                            'account_id':  'hsbc'
+                                            'description': 'Apple'
+                                        }
+                                    ]
+                            }
+                        ]
+                )
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+    describe 'add a shared transaction', ->
         it 'should update the balance', (done) ->
             
             # Create user.

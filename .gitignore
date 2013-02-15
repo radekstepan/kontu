@@ -1,2 +1,5 @@
 *.log
 node_modules/
+lib/
+lib-cov/
+coverage.html

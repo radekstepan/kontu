@@ -2,7 +2,7 @@ Q       = require 'q'
 request = require 'request'
 
 # Node.js client used for testing the API.
-class NodeClient
+class KontuClient
 
     constructor: (@url) ->
 
@@ -66,4 +66,4 @@ class NodeClient
             def.resolve body.results
         def.promise
 
-exports.NodeClient = NodeClient
+exports.KontuClient = KontuClient

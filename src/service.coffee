@@ -29,7 +29,7 @@ exports.start = (port, done) ->
 
                 unless DB?
                     # Connect to the database.
-                    mongodb.Db.connect 'mongodb://localhost:27017/ledger', (err, conn) ->
+                    mongodb.Db.connect 'mongodb://localhost:27017/kontu', (err, conn) ->
                         throw err if err
                         Q.all([ collection(conn, 'ledger'), collection(conn, 'users') ]).done( (collections) ->
                             temp = {}
@@ -42,12 +42,12 @@ exports.start = (port, done) ->
                     done DB
 
     # Require & set our app.
-    ledger = require './ledger.coffee'
-    ledger.app app
+    kontu = require './kontu'
+    kontu.app app
 
-    app.router.path '/api/users',        ledger.users
-    app.router.path '/api/accounts',     ledger.accounts
-    app.router.path '/api/transactions', ledger.transactions
+    app.router.path '/api/users',        kontu.users
+    app.router.path '/api/accounts',     kontu.accounts
+    app.router.path '/api/transactions', kontu.transactions
 
     # Start Flatiron on port.
     app.start CONFIG.port, (err) ->
