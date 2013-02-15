@@ -28,7 +28,9 @@ describe 'User', ->
                 'json':
                     'id':   'user:radek'
                     'test': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                 if res.statusCode isnt 200 then done()
                 else done new Error 'Success, is bad...'
 
@@ -41,7 +43,9 @@ describe 'User', ->
                     'id':          'user:radek'
                     'api_key':     'key:user:radek'
                     'permissions': 'root'
+                    'currency':    'GBP'
             , (err, res, body) ->
+                if err then done err
                 if res.statusCode isnt 200 then done()
                 else done new Error 'Success, is bad...'
 
@@ -53,7 +57,9 @@ describe 'User', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                 if res.statusCode isnt 200 then new Error body.message
 
                 # Create user.
@@ -63,6 +69,8 @@ describe 'User', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'

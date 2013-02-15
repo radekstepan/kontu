@@ -58,7 +58,7 @@ class Account
             def = Q.defer()
 
             collections.users.update { 'id': user.id }, user, { 'safe': true }, (err) ->
-                if err then def.reject err
+                if err then return def.reject err
                 def.resolve()
             def.promise
 
@@ -122,7 +122,7 @@ class Account
             def = Q.defer()
 
             collections.users.update { 'id': user.id }, user, { 'safe': true }, (err) ->
-                if err then def.reject err
+                if err then return def.reject err
                 def.resolve()
             def.promise
 

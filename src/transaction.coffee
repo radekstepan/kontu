@@ -37,6 +37,7 @@ class Transaction
             unless transaction.currency in @kontu.currencies
                 throw "Unknown currency `#{transaction.currency}`"
 
+            # Traverse all the transfers.
             for user_id, list of transaction.transfers
                 # Is this us?
                 unless user_id is user.id
@@ -50,16 +51,19 @@ class Transaction
         ).then( ([ user, collections ]) =>
             def = Q.defer()
             
-            users = Object.keys(req.body.transfers)
+            users = Object.keys req.body.transfers
             
+            # Do we actually have users?
+            if users.length is 0 then return def.reject { 'message': 'No users in transactions' }
+
             # Get all of the users in question.
             collections.users.find(
                 '$or': ( { 'id': u } for u in users )
             ).toArray (err, docs) =>
-                if err then def.reject err
+                if err then return def.reject err
                 # Correct count? Just double checking...
                 if docs.length isnt users.length
-                    def.reject { 'code': 500, 'message': 'Incorrect number of users in a transaction' }
+                    return def.reject { 'code': 500, 'message': 'Incorrect number of users in a transaction' }
 
                 # Convert docs into an accounts object.
                 accounts = {}
@@ -71,26 +75,33 @@ class Transaction
                         # Check that we have an account, amount and currency saved.
                         for key in [ 'account_id', 'amount', 'currency' ]
                             unless transfer[key]
-                                def.reject { 'message': "Need to provide `#{key}` in a tranfer" }
+                                return def.reject { 'message': "Need to provide `#{key}` in a transfer" }
                         
                         # Is the amount an actual number?
                         unless not isNaN(parseFloat(transfer.amount)) and isFinite(transfer.amount)
-                            def.reject { 'message': "`#{transfer.amount}` is not a number" }
+                            return def.reject { 'message': "`#{transfer.amount}` is not a number" }
                         # OK, is the amount a 'correct' number?
                         if parseFloat((parseFloat(transfer.amount)).toFixed(2)) isnt transfer.amount
-                            def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
-                        
+                            return def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
+
                         # Do we know this currency?
                         transfer.currency = transfer.currency.toUpperCase() # match on case
                         unless transfer.currency in @kontu.currencies
-                            def.reject { 'message': "Unknown currency `#{transfer.currency}`" }
+                            return def.reject { 'message': "Unknown currency `#{transfer.currency}`" }
 
                         # Does the account exist?
-                        unless accounts[user_id][transfer.account_id]
-                            def.reject { 'message': "User `#{user_id}` does not have account `#{transfer.account_id}`" }
+                        unless acc = accounts[user_id][transfer.account_id]
+                            return def.reject { 'message': "User `#{user_id}` does not have account `#{transfer.account_id}`" }
+
+                        # For some reason currency not supplied on account?
+                        unless acc.currency
+                            return def.reject { 'message': "Account `#{transfer.account_id}` does not have a `currency` field" }
 
                         # Do we match on currency?
-                        
+                        if transfer.currency isnt acc.currency
+                            # We better have the exchange rate then.
+                            unless transfer.rate and not isNaN(parseFloat(transfer.rate)) and isFinite(transfer.rate)
+                                return def.reject { 'message': "Exchange `rate` not provided, transfer and account currencies do not match" }
 
                 def.resolve collections
 
@@ -100,7 +111,7 @@ class Transaction
         ).then( (collections) ->
             def = Q.defer()
             collections.ledger.insert req.body, { 'safe': true }, (err, doc) ->
-                if err then def.reject err
+                if err then return def.reject err
                 def.resolve doc
             def.promise
 
@@ -125,7 +136,7 @@ class Transaction
 
             def = Q.defer()
             collections.ledger.find(q).toArray (err, docs) ->
-                if err then def.reject err
+                if err then return def.reject err
                 def.resolve [ user, docs ]
             def.promise
 

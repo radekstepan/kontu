@@ -26,7 +26,7 @@ exports.start = (port, done) ->
                 collection = (conn, name) ->
                     def = Q.defer()
                     conn.collection CONFIG.env + ':' + name, (err, coll) ->
-                        if err then def.reject err
+                        if err then return def.reject err
                         else def.resolve [ name, coll ]
                     def.promise
 
@@ -58,7 +58,7 @@ exports.start = (port, done) ->
         clean = (collection) ->
             def = Q.defer()
             collection.remove {}, (err, removed) ->
-                if err then def.reject err
+                if err then return def.reject err
                 else def.resolve()
             def.promise
 

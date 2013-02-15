@@ -31,9 +31,11 @@ describe 'Invite', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
 
             # Allow user 1 to share expenses with user 2.
             ).then( ->
@@ -45,7 +47,8 @@ describe 'Invite', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject body
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject body
                     else def.resolve()
                 def.promise
 
@@ -61,9 +64,11 @@ describe 'Invite', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve()
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Allow user 1 to share expenses with user 2.
@@ -77,7 +82,8 @@ describe 'Invite', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
 
@@ -93,9 +99,11 @@ describe 'Invite', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve()
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Allow user 1 to share expenses with user 2.
@@ -109,7 +117,8 @@ describe 'Invite', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
 
@@ -125,9 +134,11 @@ describe 'Invite', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve()
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Create user 2.
@@ -139,9 +150,11 @@ describe 'Invite', ->
                     'json':
                         'id':      'user:barbora'
                         'api_key': 'key:user:barbora'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve()
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Allow user 1 to share expenses with user 2.
@@ -155,8 +168,9 @@ describe 'Invite', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve()
-                    else def.reject()
+                    else return def.reject()
                 def.promise
 
             # Allow user 1 to share expenses with user 2.
@@ -170,7 +184,8 @@ describe 'Invite', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
 

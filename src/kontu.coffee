@@ -48,8 +48,8 @@ class Kontu
         ).then( ([ api_key, collections ]) ->
             def = Q.defer()
             collections.users.findOne { 'api_key': api_key }, (err, doc) ->
-                if err then def.reject err
-                if !doc then def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
+                if err then return def.reject err
+                if !doc then return def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
                 def.resolve [ doc, collections ]
             def.promise
         )

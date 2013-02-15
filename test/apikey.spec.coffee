@@ -28,7 +28,9 @@ describe 'API Key', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                 
                 # Create an account for the user.
                 request
@@ -39,6 +41,7 @@ describe 'API Key', ->
                         'currency': 'GBP'
                         'type':     102
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'
 
@@ -50,7 +53,9 @@ describe 'API Key', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
 
                 # Create an account for the user.
                 request
@@ -63,5 +68,6 @@ describe 'API Key', ->
                     'headers':
                         'x-apikey': 'key:user:test'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'

@@ -11,9 +11,9 @@ class User
         # Get the data posted.
         Q.fcall( ->
             user = req.body
-            for key in  [ 'id', 'api_key' ]
+            for key in  [ 'id', 'api_key', 'currency' ]
                 unless user[key] then throw "Need to provide user `#{key}`"
-            unless Object.keys(user).length is 2 then throw "Provided incorrect number of keys"
+            unless Object.keys(user).length is 3 then throw "Provided incorrect number of keys"
             user
 
         # Gives us db access.
@@ -26,8 +26,8 @@ class User
         ).then( ([ user, collections ]) ->
             def = Q.defer()
             collections.users.findOne { 'id': user.id }, (err, doc) ->
-                if err then def.reject err
-                if doc then def.reject { 'code': 400, 'message': "User `#{user.id}` already exists" }
+                if err then return def.reject err
+                if doc then return def.reject { 'code': 400, 'message': "User `#{user.id}` already exists" }
                 def.resolve [ user, collections ]
             def.promise
 
@@ -39,7 +39,7 @@ class User
             user.accounts = {}
 
             collections.users.insert user, { 'safe': true }, (err) ->
-                if err then def.reject err
+                if err then return def.reject err
                 def.resolve user
             def.promise
 

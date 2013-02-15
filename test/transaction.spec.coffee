@@ -31,9 +31,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -49,8 +51,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -74,7 +77,8 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
 
@@ -90,9 +94,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -108,8 +114,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -134,7 +141,8 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
             
@@ -150,9 +158,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -168,8 +178,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -202,7 +213,8 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
             
@@ -218,9 +230,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -236,8 +250,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -266,7 +281,8 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
             
@@ -282,9 +298,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -300,8 +318,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -326,7 +345,8 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
             
@@ -342,9 +362,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -360,8 +382,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -386,7 +409,8 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
-                    if res.statusCode is 200 then def.reject()
+                    if err then done err
+                    if res.statusCode is 200 then return def.reject()
                     else def.resolve()
                 def.promise
             
@@ -402,9 +426,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -420,8 +446,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -446,8 +473,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Get a list of transactions for a user.
@@ -460,8 +488,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             ).then( (results) ->
@@ -498,9 +527,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create user 2.
@@ -512,9 +543,11 @@ describe 'Transaction', ->
                     'json':
                         'id':      'user:barbora'
                         'api_key': 'key:user:barbora'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Allow user 1 to share expenses with user 2.
@@ -528,8 +561,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:barbora'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Create an account for user 1.
@@ -545,8 +579,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -584,8 +619,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Get a list of transactions for user1.
@@ -598,8 +634,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             ).then( (results) ->
@@ -648,8 +685,9 @@ describe 'Transaction', ->
                     'headers':
                         'x-apikey': 'key:user:barbora'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             ).then( (results) ->

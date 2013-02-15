@@ -33,6 +33,7 @@ describe 'Account', ->
                 'headers':
                     'x-apikey': 'key:user:radek'
             , (err, res, body) ->
+                if err then done err
                 if res.statusCode isnt 200 then done()
                 else done new Error 'Success, is bad...'
 
@@ -44,7 +45,9 @@ describe 'Account', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                
                 # Create an account for the user.
                 request
@@ -56,6 +59,7 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'
 
@@ -67,7 +71,9 @@ describe 'Account', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                
                 # Create an account for the user.
                 request
@@ -81,6 +87,7 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'
 
@@ -92,7 +99,9 @@ describe 'Account', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                
                 # Create an account for the user.
                 request
@@ -104,6 +113,7 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'
 
@@ -115,7 +125,9 @@ describe 'Account', ->
                 'json':
                     'id':      'user:radek'
                     'api_key': 'key:user:radek'
+                    'currency': 'GBP'
             , (err, res, body) ->
+                if err then done err
                
                 # Create an account for the user.
                 request
@@ -128,6 +140,7 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode isnt 200 then new Error body.message
 
                     # Create an account for the user.
@@ -141,6 +154,7 @@ describe 'Account', ->
                         'headers':
                             'x-apikey': 'key:user:radek'
                     , (err, res, body) ->
+                        if err then done err
                         if res.statusCode isnt 200 then done()
                         else done new Error 'Success, is bad...'
 
@@ -154,9 +168,11 @@ describe 'Account', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -173,8 +189,9 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -199,8 +216,9 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Get a list of transactions for a user.
@@ -213,8 +231,9 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             ).then( (results) ->
@@ -251,9 +270,11 @@ describe 'Account', ->
                     'json':
                         'id':      'user:radek'
                         'api_key': 'key:user:radek'
+                        'currency': 'GBP'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -270,8 +291,9 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Update the account.
@@ -288,8 +310,9 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             # Get the account listing.
@@ -302,8 +325,9 @@ describe 'Account', ->
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
+                    if err then done err
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject body.message
+                    else return def.reject body.message
                 def.promise
 
             ).then( (results) ->
