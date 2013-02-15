@@ -46,6 +46,7 @@ exports.start = (port, done) ->
     ledger.app app
 
     app.router.path '/api/users',        ledger.users
+    app.router.path '/api/accounts',     ledger.accounts
     app.router.path '/api/transactions', ledger.transactions
 
     # Start Flatiron on port.

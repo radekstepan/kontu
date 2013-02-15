@@ -39,18 +39,13 @@ exports.users = ->
         # Save the new information.
         ).then( ([ user, collections ]) ->
             def = Q.defer()
+
+            # Reject any accounts trying to be saved with the user. A blank slate.
+            user.accounts = {}
+
             collections.users.insert user, { 'safe': true }, (err) ->
                 if err then def.reject err
-                def.resolve [ user, collections ]
-            def.promise
-
-        # Query for us to make sure.
-        ).then( ([ user, collections ]) ->
-            def = Q.defer()
-            collections.users.findOne 'id': user.id, (err, doc) ->
-                if err then def.reject err
-                if !doc then def.reject { 'code': 500, 'message': "We should be saving `#{user.id}` but we ain't" }
-                def.resolve doc
+                def.resolve user
             def.promise
 
         ).done( (user) ->
@@ -60,7 +55,86 @@ exports.users = ->
             res.end()
         , (err) ->
             code = err.code or 400
-            message = err.message or 'Error'
+            # Is the error a string or an object.
+            if typeof(err) is 'object'
+                message = err.message or 'Error'
+            else
+                message = err
+
+            # Respond.
+            res.writeHead code, 'content-type': 'application/json'
+            res.write JSON.stringify 'message': message
+            res.end()
+        )
+
+exports.accounts = ->
+    ###
+    Save a new account.
+    ###
+    @post ->
+        req = @req ; res = @res
+        
+        # Which user is this for?
+        Q.fcall( ->
+            api_key = req.headers['x-apikey']
+            # Provided key?
+            unless api_key then throw { 'message': 'API key not provided' }
+            else api_key
+        
+        # Gives us db access.
+        ).then( (api_key) ->
+            def = Q.defer()
+            db (collections) -> def.resolve [ api_key, collections ]
+            def.promise
+        
+        # Check we know this user.
+        ).then( ([ api_key, collections ]) ->
+            def = Q.defer()
+            collections.users.findOne { 'api_key': api_key }, (err, doc) ->
+                if err then def.reject err
+                if !doc then def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
+                def.resolve [ doc, collections ]
+            def.promise
+
+        # Check if doc matches the spec.
+        ).then( ([ user, collections ]) ->
+            # Does it have all the keys?
+            account = req.body
+            for key in  [ 'id', 'type' ]
+                unless account[key] then throw "Need to provide account `#{key}`"
+            unless Object.keys(account).length is 2 then throw "Provided incorrect number of keys"
+            # Does the account exist already?
+            if user.accounts[account.id] then throw "Account `#{id}` exists already"
+            # Does the type match the types we know about?
+            if account.type not in [ 101...112 ].concat [ 201, 206, 210, 220, 250, 270, 300, 350, 360, 370 ]
+                throw "Account type `#{account.type}` not known"
+
+            # Add it to the user object.
+            user.accounts[account.id] = { 'type': account.type }
+
+            [ user, collections ]
+
+        # Update the user with the new account.
+        ).then( ([ user, collections ]) ->
+            def = Q.defer()
+
+            collections.users.update { 'id': user.id }, user, { 'safe': true }, (err) ->
+                if err then def.reject err
+                def.resolve()
+            def.promise
+
+        ).done( (doc) ->
+            # Respond.
+            res.writeHead 200, 'content-type': 'application/json'
+            res.end()
+        , (err) ->
+            code = err.code or 400
+            # Is the error a string or an object.
+            if typeof(err) is 'object'
+                message = err.message or 'Error'
+            else
+                message = err
+
             # Respond.
             res.writeHead code, 'content-type': 'application/json'
             res.write JSON.stringify 'message': message
@@ -93,37 +167,80 @@ exports.transactions = ->
             collections.users.findOne { 'api_key': api_key }, (err, doc) ->
                 if err then def.reject err
                 if !doc then def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
-                def.resolve doc
+                def.resolve [ doc, collections ]
             def.promise
         
         # Do we know all the accounts and users?.
-        ).then( (user) ->
+        ).then( ([ user, collections ]) ->
             for user_id, list of req.body.transactions
-                # This is us.
-                if user_id is user.id
-                    1
-                # Do we share an account with this user?
-                else
+                # Is this us?
+                unless user_id is user.id
+                    # Do we share an account with this user?
                     if user_id + ':debtor' in user.accounts or user_id + ':creditor' in user.accounts
-                        1
+                        console.log 'a debtor/creditor'
                     else
                         throw "Cannot add transaction for user `#{user_id}`"
 
-        ).done( ->
+            [ user, collections ]
+
+        # Now check that all the accounts mentioned in the transaction exist and transfers are correctly formatted.
+        ).then( ([ user, collections ]) ->
+            def = Q.defer()
+            
+            users = Object.keys(req.body.transactions)
+            
+            # Get all of the users in question.
+            collections.users.find(
+                '$or': ( { 'id': u } for u in users )
+            ).toArray (err, docs) ->
+                if err then def.reject err
+                # Correct count? Just double checking...
+                if docs.length isnt users.length then def.reject { 'code': 500, 'message': 'Incorrect number of users in a transaction' }
+
+                # Convert docs into an accounts object.
+                accounts = {}
+                ( accounts[doc.id] = doc.accounts or {} for doc in docs )
+
+                # Check that all the accounts in the request exist in the appropriate users.
+                for user_id, list of req.body.transactions
+                    for transfer in list
+                        # Check that we have an account and amount saved.
+                        for key in  [ 'account_id', 'amount' ]
+                            unless transfer[key] then def.reject { 'message': "Need to provide `#{key}` in a tranfer" }
+                        # Is the amount an actual number?
+                        unless !isNaN(parseFloat(transfer.amount)) and isFinite(transfer.amount) then def.reject { 'message': "`#{transfer.amount}` is not a number" }
+                        # OK, is the amount a 'correct' number?
+                        if parseFloat(transfer.amount.toFixed(2)) isnt transfer.amount then def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
+                        # Does the account exist?
+                        unless accounts[user_id][transfer.account_id] then def.reject { 'message': "User `#{user_id}` does not have account `#{transfer.account_id}`" }
+
+                def.resolve collections
+
+            def.promise
+
+        # All went fine, save the request into the ledger.
+        ).then( (collections) ->
+            def = Q.defer()
+            collections.ledger.insert req.body, { 'safe': true }, (err, doc) ->
+                if err then def.reject err
+                def.resolve doc
+            def.promise            
+
+        ).done( (doc) ->
             # Respond.
             res.writeHead 200, 'content-type': 'application/json'
+            res.write JSON.stringify 'transaction_id': doc._id
             res.end()
         , (err) ->
             code = err.code or 400
-            message = err.message or 'Error'
+            # Is the error a string or an object.
+            if typeof(err) is 'object'
+                message = err.message or 'Error'
+            else
+                message = err
+
             # Respond.
             res.writeHead code, 'content-type': 'application/json'
             res.write JSON.stringify 'message': message
             res.end()
         )
-
-    ###
-    Get all transactions for a user.
-    ###
-    @get ->
-        @res.end()

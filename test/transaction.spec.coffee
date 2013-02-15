@@ -49,6 +49,23 @@ describe 'Ledger', ->
                     def.resolve()
                 def.promise
             
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':   'hsbc'
+                        'type': 102
+                    'headers':
+                        'x-apikey': '@dummy!'
+                , (err, res, body) ->
+                    if err then def.reject err
+                    if res.statusCode isnt 200 then def.reject body.message
+                    def.resolve()
+                def.promise
+
             # Post a new transaction.
             ).then( ->
                 def = Q.defer()
@@ -56,8 +73,6 @@ describe 'Ledger', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
-                        'id':     'user:radek'
-                        'amount': 10.00
                         'transactions':
                             'user:radek': [
                                 {
