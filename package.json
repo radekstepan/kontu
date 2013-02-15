@@ -6,6 +6,7 @@
         "chai": "1.4.2",
         "coffee-script": "1.4.0",
         "flatiron": "0.3.3",
+        "director": "1.1.10",
         "union": "0.3.6",
         "mongodb": "1.2.9",
         "request": "2.12.0",

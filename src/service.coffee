@@ -1,4 +1,5 @@
 flatiron = require 'flatiron'
+director = require 'director'
 mongodb  = require 'mongodb'
 Q        = require 'q'
 
@@ -48,31 +49,39 @@ exports.start = (port, done) ->
     Kontu = require './kontu'
     kontu = new Kontu app.db
 
-    app.router.path '/api/users',        kontu.user
-    app.router.path '/api/invite',       kontu.invite
-    app.router.path '/api/accounts',     kontu.account
-    app.router.path '/api/transactions', kontu.transaction
+    # All the routes an their mapping.
+    routes =
+        '/api':
+            '/users':        kontu.user
+            '/invite':       kontu.invite
+            '/accounts':     kontu.account
+            '/transactions': kontu.transaction
+            # Remove the following testing routes.
+            '/clean':
+                get: ->
+                    res = @res
 
-    # Cleanup the collections in a database.
-    if CONFIG.env is 'test'
-        clean = (collection) ->
-            def = Q.defer()
-            collection.remove {}, (err, removed) ->
-                if err then return def.reject err
-                else def.resolve()
-            def.promise
+                    clean = (collection) ->
+                        def = Q.defer()
+                        collection.remove {}, (err, removed) ->
+                            if err then return def.reject err
+                            else def.resolve()
+                        def.promise
 
-        app.router.path '/api/clean', ->
-            @get ->
-                res = @res
-                app.db (collections) ->
-                    Q.all([ clean(collections.users), clean(collections.ledger) ]).done( ->
-                        res.writeHead 200
-                        res.end()
-                    , ->
-                        res.writeHead 500
-                        res.end()
-                    )
+                    app.db (collections) ->
+                        Q.all([ clean(collections.users), clean(collections.ledger) ]).done( ->
+                            res.writeHead 200
+                            res.end()
+                        , ->
+                            res.writeHead 500
+                            res.end()
+                        )
+
+    # Cleanup the collections in a database?
+    if CONFIG.env isnt 'test' then delete routes['/api']['/clean']
+
+    # Instantiate the Director router.
+    app.router = new director.http.Router routes
 
     # Start Flatiron on port.
     app.start CONFIG.port, (err) ->

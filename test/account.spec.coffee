@@ -301,7 +301,7 @@ describe 'Account', ->
                 def = Q.defer()
                 request
                     'method': 'PUT'
-                    'url': url + '/api/accounts'
+                    'url': url + '/api/accounts/hsbc'
                     'json':
                         'id':       'hsbc'
                         'type':     102

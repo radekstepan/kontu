@@ -1,34 +1,43 @@
 Q = require 'q'
 
+User        = require './user'
+Invite      = require './invite'
+Account     = require './account'
+Transaction = require './transaction'
+
 class Kontu
 
     # We understand these currencies.
     currencies: [ 'USD', 'CZK', 'GBP', 'EUR' ]
 
     constructor: (@db) ->
-
-    user: (service) =>
-        User = require './user'
         user = new User @
-        service.post -> user.post @req, @res
+        @user =
+            # Save new user.
+            post: -> user.post @req, @res
 
-    invite: (service) =>
-        Invite = require './invite'
         invite = new Invite @
-        service.post -> invite.post @req, @res
+        @invite =
+            # Make an invite.
+            post: -> invite.post @req, @res
 
-    account: (service) =>
-        Account = require './account'
         account = new Account @
-        service.post -> account.post @req, @res
-        service.get ->  account.get  @req, @res
-        service.put ->  account.put  @req, @res
-
-    transaction: (service) =>
-        Transaction = require './transaction'
+        @account =
+            # Save new account.
+            post: -> account.post @req, @res
+            # Get all accounts.
+            get: ->  account.get  @req, @res
+            
+            '/:id':
+                # Update a specific account.
+                put: (id) -> account.put @req, @res, id
+        
         transaction = new Transaction @
-        service.post -> transaction.post @req, @res
-        service.get ->  transaction.get  @req, @res
+        @transaction =
+            # Save new transaction.
+            post: ->   transaction.post @req, @res
+            # Get all transactions.
+            get: ->    transaction.get  @req, @res
 
     # Check that API Key is valid.
     checkApi: (api_key) =>

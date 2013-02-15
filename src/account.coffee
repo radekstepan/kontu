@@ -1,4 +1,5 @@
 Q = require 'q'
+urlib = require 'url'
 
 class Account
 
@@ -19,7 +20,7 @@ class Account
             # Does it have all the keys?
             account = req.body
             
-            for key in  [ 'id', 'type', 'currency' ]
+            for key in [ 'id', 'type', 'currency' ]
                 unless account[key] then throw "Need to provide account `#{key}`"
             
             # Do we have a difference?
@@ -71,9 +72,9 @@ class Account
     ###
     Update an account.
     ###
-    put: (req, res) =>
+    put: (req, res, id) =>
         kontu = @kontu
-        
+
         # Check API Key.
         Q.fcall( =>
             @kontu.checkApi req.headers['x-apikey']
@@ -104,12 +105,15 @@ class Account
             unless Object.keys(account).length is 4 then throw "Provided incorrect number of keys"
 
             # Does the account not exist already?
-            unless user.accounts[account.id] then throw "Account `#{account.id}` does not exist"
+            unless user.accounts[id] then throw "Account `#{id}` does not exist"
             # Does the type match the types we know about?
             if account.type not in [ 101...112 ].concat [ 201, 206, 210, 220, 250, 270, 300, 350, 360, 370 ]
                 throw "Account type `#{account.type}` not known"
 
-            # Replace it in the user object.
+            # Delete the previous account.
+            delete user.accounts[id]
+
+            # Create a new account in the user object.
             user.accounts[account.id] =
                 'type':       account.type
                 'currency':   account.currency
