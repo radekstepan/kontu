@@ -18,12 +18,14 @@ class Kontu
         Account = require './account'
         account = new Account @
         service.post -> account.post @req, @res
+        service.get ->  account.get  @req, @res
+        service.put ->  account.put  @req, @res
 
     transaction: (service) =>
         Transaction = require './transaction'
         transaction = new Transaction @
         service.post -> transaction.post @req, @res
-        service.get -> transaction.get @req, @res
+        service.get ->  transaction.get  @req, @res
 
     # Check that API Key is valid.
     checkApi: (api_key) =>

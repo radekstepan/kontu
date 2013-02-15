@@ -229,3 +229,77 @@ describe 'Account', ->
                         ]
 
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+        it 'success updating an account', (done) ->
+            # Create user.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+            
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':         'hsbc'
+                        'type':       102
+                        'difference': 15.67
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Update the account.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'PUT'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':         'hsbc'
+                        'type':       102
+                        'difference': 25.67
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Get the account listing.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'GET'
+                    'url': url + '/api/accounts'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            ).then( (results) ->
+                # Does the response match?
+                expect(genericise results).to.deep.equal
+                    'results':
+                        'accounts':
+                            'hsbc':
+                                'type':       102
+                                'difference': 25.67
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
