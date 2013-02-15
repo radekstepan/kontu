@@ -1,12 +1,21 @@
-should = require('chai').should()
+require('chai').should()
+
+f = require '../finances.coffee'
 
 describe 'Expense', ->
 
-    foo = "bar"
-    beverages = tea: [ 'chai', 'matcha', 'oolong' ]
+    describe 'simple expense on debit account', ->
+        acc = new f.DebitAccount(0)
+        it 'should update the balance to negative amount', ->
+            acc.should.have.property('balance').equal(0)
+            acc.addExpense(5.67)
+            acc.addExpense(4.13)
+            acc.should.have.property('balance').equal(-9.80)
 
-    it 'it should work', ->
-        foo.should.be.a "string"
-        foo.should.equal "bar"
-        foo.should.have.length 3
-        beverages.should.have.property("tea").with.length 3
+    describe 'simple expense on credit account', ->
+        acc = new f.CreditAccount(0)
+        it 'should update the balance to positive amount', ->
+            acc.should.have.property('balance').equal(0)
+            acc.addExpense(5.67)
+            acc.addExpense(4.13)
+            acc.should.have.property('balance').equal(9.80)
