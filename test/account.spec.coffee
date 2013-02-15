@@ -241,7 +241,10 @@ describe 'Account', ->
                 expect(genericise results).to.deep.equal
                     'results':
                         'accounts':
-                            'hsbc': 5.67
+                            'hsbc':
+                                'type': 102
+                                'currency': 'GBP'
+                                'balance': 5.67
                         'transactions': [
                             {
                                 'amount': 10.00

@@ -39,6 +39,10 @@ class Kontu
             # Get all transactions.
             get: ->    transaction.get  @req, @res
 
+            '/:id':
+                # Delete a specific transaction.
+                delete: (id) -> transaction.delete @req, @res, id
+
     # Check that API Key is valid.
     checkApi: (api_key) =>
         # Which user is this for?

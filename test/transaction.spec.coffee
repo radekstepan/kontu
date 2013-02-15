@@ -498,7 +498,10 @@ describe 'Transaction', ->
                 expect(genericise results).to.deep.equal
                     'results':
                         'accounts':
-                            'hsbc': -10
+                            'hsbc':
+                                'type': 102
+                                'currency': 'GBP'
+                                'balance': -10
                         'transactions': [
                             {
                                 'amount': 10.00
@@ -644,8 +647,14 @@ describe 'Transaction', ->
                 expect(genericise results).to.deep.equal
                     'results':
                         'accounts':
-                            'hsbc':                -10
-                            'user:barbora:debtor': 4
+                            'hsbc':
+                                'type': 102
+                                'currency': 'GBP'
+                                'balance': -10
+                            'user:barbora:debtor':
+                                'type': 103
+                                'currency': 'GBP'
+                                'balance': 4
                         'transactions': [
                             {
                                 'amount': 10.00
@@ -695,7 +704,10 @@ describe 'Transaction', ->
                 expect(genericise results).to.deep.equal
                     'results':
                         'accounts':
-                            'user:radek:creditor': -4
+                            'user:radek:creditor':
+                                'type': 201
+                                'currency': 'GBP'
+                                'balance': -4
                         'transactions': [
                             {
                                 'amount': 10.00
@@ -724,5 +736,110 @@ describe 'Transaction', ->
                                     ]
                             }
                         ]
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+        it 'success deleting a transaction', (done) ->
+            # Create user.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                        'currency': 'GBP'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+            
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Post a new transaction.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/transactions'
+                    'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
+                        'created': (new Date()).getTime()
+                        'transfers':
+                            'user:radek': [
+                                {
+                                    'amount':      -10.00
+                                    'account_id':  'hsbc'
+                                    'currency':    'GBP'
+                                    'description': 'Apple'
+                                }
+                            ]
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body.results.id
+                    else return def.reject body.message
+                def.promise
+
+            # Remove the transaction.
+            ).then( (id) ->
+                def = Q.defer()
+                request
+                    'method': 'DELETE'
+                    'url': url + "/api/transactions/#{id}"
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Get a list of transactions for a user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'GET'
+                    'url': url + '/api/transactions'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            ).then( (results) ->
+                # Does the response match?
+                expect(genericise results).to.deep.equal
+                    'results':
+                        'accounts':
+                            'hsbc':
+                                'type': 102
+                                'currency': 'GBP'
+                                'balance': 0
+                        'transactions': []
 
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))

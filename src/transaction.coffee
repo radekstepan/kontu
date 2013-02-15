@@ -1,4 +1,5 @@
-Q = require 'q'
+Q        = require 'q'
+mongodb  = require 'mongodb'
 
 class Transaction
 
@@ -110,13 +111,13 @@ class Transaction
         # All went fine, save the request into the ledger.
         ).then( (collections) ->
             def = Q.defer()
-            collections.ledger.insert req.body, { 'safe': true }, (err, doc) ->
+            collections.ledger.insert req.body, { 'safe': true }, (err, docs) ->
                 if err then return def.reject err
-                def.resolve doc
+                def.resolve docs.pop()
             def.promise
 
-        ).done( =>
-            @kontu.success res
+        ).done( (doc) =>
+            @kontu.success res, 'id': doc._id
         , (err) =>
             @kontu.error res, err
         )
@@ -142,17 +143,49 @@ class Transaction
 
         # Calculate the totals for each account.
         ).then( ([ user, docs ]) ->
+            # Make a difference into a total balance.
             accounts = {}
+            for key, val of user.accounts
+                val.balance = val.difference
+                delete val.difference
+                accounts[key] = val
+
+            # Go through transactions and update the balance.
             for doc in docs
                 for t in doc.transfers[user.id]
-                    accounts[t.account_id] ?= user.accounts[t.account_id].difference
-                    accounts[t.account_id] += t.amount
-            
+                    accounts[t.account_id].balance += t.amount # throws if acc not present :)
+
             'accounts':     accounts
             'transactions': docs
 
         ).done( (results) =>
             @kontu.success res, results
+        , (err) =>
+            @kontu.error res, err
+        )
+
+    ###
+    Delete a transaction.
+    ###
+    delete: (req, res, id) =>
+        # Check API Key.
+        Q.fcall( =>
+            @kontu.checkApi req.headers['x-apikey']
+
+        # Get the data? We need a transaction id AND be involved.
+        ).then( ([ user, collections ]) ->
+            q = '_id': mongodb.ObjectID.createFromHexString id
+            q["transfers.#{user.id}"] = '$exists': true
+
+            def = Q.defer()
+            collections.ledger.remove q, { 'safe': true }, (err, removed) ->
+                if err then return def.reject err
+                if removed isnt 1 then return def.reject { 'message': "We have removed `#{removed}` transactions" }
+                def.resolve()
+            def.promise
+
+        ).done( =>
+            @kontu.success res
         , (err) =>
             @kontu.error res, err
         )
