@@ -37,23 +37,25 @@ describe 'Ledger', ->
             # Create user.
             Q.fcall( ->
                 def = Q.defer()
-                request.post
+                request
+                    'method': 'POST'
                     'url': url + '/api/users'
-                    'form':
+                    'json':
                         'id':      'user:radek'
                         'api_key': '@dummy!'
                 , (err, res, body) ->
                     if err then def.reject err
-                    if res.statusCode isnt 200 then def.reject JSON.parse(body).message
+                    if res.statusCode isnt 200 then def.reject body.message
                     def.resolve()
                 def.promise
             
             # Post a new transaction.
             ).then( ->
                 def = Q.defer()
-                request.post
+                request
+                    'method': 'POST'
                     'url': url + '/api/transactions'
-                    'form':
+                    'json':
                         'id':     'user:radek'
                         'amount': 10.00
                         'transactions':
@@ -68,7 +70,7 @@ describe 'Ledger', ->
                         'x-apikey': '@dummy!'
                 , (err, res, body) ->
                     if err then def.reject err
-                    if res.statusCode isnt 200 then def.reject JSON.parse(body).message
+                    if res.statusCode isnt 200 then def.reject body.message
                     def.resolve()
                 def.promise
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))

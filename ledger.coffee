@@ -96,6 +96,12 @@ exports.transactions = ->
                 def.resolve doc
             def.promise
         
+        # Do we know all the accounts and users?.
+        ).then( (user) ->
+            for user_id, list of req.body.transactions
+                if (user_id not user.id) and (not user.accounts[user_id])
+                    throw "Unknown user `#{user_id}`"
+
         ).done( ->
             # Respond.
             res.writeHead 200, 'content-type': 'application/json'
