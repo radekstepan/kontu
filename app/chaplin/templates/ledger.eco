@@ -1,1 +1,49 @@
-Hello world!
+<div class="container">
+    <header class="row">
+        <div id="month" class="twelve columns">
+            <h1>February '13</h1>
+            <a class="secondary button">
+                <span class="entypo chevron-small-left"></span>
+            </a>
+            <a class="secondary button">
+                <span class="entypo chevron-small-right"></span>
+            </a>
+            <a class="button right">Add Transaction</a>
+        </div>
+    </header>
+    <div class="row">
+        <div class="four columns">
+            <form id="accounts" class="custom">
+                <h2>Assets</h2>
+                <ul>
+                    <li><a>Un/select all</a></li>
+                    <li><input type="checkbox" /> Cash <span class="right">&pound;155.79</span></li>
+                    <li><input type="checkbox" /> HSBC Bank Account <span class="right">&pound;1,945.15</span></li>
+                </ul>
+
+                <h2>Liabilities</h2>
+                <ul>
+                    <li><a>Un/select all</a></li>
+                    <li><input type="checkbox" /> VISA Credit Card <span class="right">- &pound;790.00</span></li>
+                    <li><input type="checkbox" /> HSBC <span class="right">- &pound;15.37</span></li>
+                </ul>                
+            </form>
+        </div>
+        <div class="eight columns">
+            <table id="ledger">
+                <tbody>
+                    <tr>
+                        <td>Today</td>
+                        <td>An apple</td>
+                        <td class="money">&pound;0.75</td>
+                    </tr>
+                    <tr>
+                        <td>Yesterday</td>
+                        <td>A bike</td>
+                        <td class="money">&pound;40.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
