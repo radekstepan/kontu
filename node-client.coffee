@@ -63,8 +63,7 @@ class NodeClient
         , (err, res, body) ->
             if err then def.reject err
             if res.statusCode isnt 200 then def.reject body.message
-            # Remove the `_id` keys.
-            def.resolve ( ( delete obj._id ; obj ) for obj in body.results )
+            def.resolve body.results
         def.promise
 
 exports.NodeClient = NodeClient

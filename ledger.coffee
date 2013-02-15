@@ -157,7 +157,7 @@ exports.transactions = ->
         
         # Do we know all the accounts and users?.
         ).then( ([ user, collections ]) ->
-            for user_id, list of req.body.transactions
+            for user_id, list of req.body.transfers
                 # Is this us?
                 unless user_id is user.id
                     # Do we share an account with this user?
@@ -172,7 +172,7 @@ exports.transactions = ->
         ).then( ([ user, collections ]) ->
             def = Q.defer()
             
-            users = Object.keys(req.body.transactions)
+            users = Object.keys(req.body.transfers)
             
             # Get all of the users in question.
             collections.users.find(
@@ -180,24 +180,29 @@ exports.transactions = ->
             ).toArray (err, docs) ->
                 if err then def.reject err
                 # Correct count? Just double checking...
-                if docs.length isnt users.length then def.reject { 'code': 500, 'message': 'Incorrect number of users in a transaction' }
+                if docs.length isnt users.length
+                    def.reject { 'code': 500, 'message': 'Incorrect number of users in a transaction' }
 
                 # Convert docs into an accounts object.
                 accounts = {}
                 ( accounts[doc.id] = doc.accounts or {} for doc in docs )
 
                 # Check that all the accounts in the request exist in the appropriate users.
-                for user_id, list of req.body.transactions
+                for user_id, list of req.body.transfers
                     for transfer in list
                         # Check that we have an account and amount saved.
                         for key in  [ 'account_id', 'amount' ]
-                            unless transfer[key] then def.reject { 'message': "Need to provide `#{key}` in a tranfer" }
+                            unless transfer[key]
+                                def.reject { 'message': "Need to provide `#{key}` in a tranfer" }
                         # Is the amount an actual number?
-                        unless !isNaN(parseFloat(transfer.amount)) and isFinite(transfer.amount) then def.reject { 'message': "`#{transfer.amount}` is not a number" }
+                        unless not isNaN(parseFloat(transfer.amount)) and isFinite(transfer.amount)
+                            def.reject { 'message': "`#{transfer.amount}` is not a number" }
                         # OK, is the amount a 'correct' number?
-                        if parseFloat(transfer.amount.toFixed(2)) isnt transfer.amount then def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
+                        if parseFloat(transfer.amount.toFixed(2)) isnt transfer.amount
+                            def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
                         # Does the account exist?
-                        unless accounts[user_id][transfer.account_id] then def.reject { 'message': "User `#{user_id}` does not have account `#{transfer.account_id}`" }
+                        unless accounts[user_id][transfer.account_id]
+                            def.reject { 'message': "User `#{user_id}` does not have account `#{transfer.account_id}`" }
 
                 def.resolve collections
 
@@ -230,16 +235,27 @@ exports.transactions = ->
         # Get the data.
         ).then( ([ user, collections ]) ->
             q = {}
-            q["transactions.#{user.id}"] = '$exists': true
+            q["transfers.#{user.id}"] = '$exists': true
 
             def = Q.defer()
             collections.ledger.find(q).toArray (err, docs) ->
                 if err then def.reject err
-                def.resolve docs
+                def.resolve [ user, docs ]
             def.promise
 
-        ).done( (docs) ->
-            successHandler res, docs
+        # Calculate the totals for each account.
+        ).then( ([ user, docs ]) ->
+            accounts = {}
+            for doc in docs
+                for t in doc.transfers[user.id]
+                    accounts[t.account_id] ?= 0
+                    accounts[t.account_id] += t.amount
+
+            'accounts':     accounts
+            'transactions': docs
+
+        ).done( (results) ->
+            successHandler res, results
         , (err) ->
             errorHandler res, err
         )

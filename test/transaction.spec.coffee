@@ -24,6 +24,17 @@ clean = (collection) ->
         def.promise
     )
 
+# Remove `_id` coming from MongoDB.
+deidentify = (obj) ->
+    if obj instanceof Array
+        return ( deidentify(row) for row in obj )
+    if typeof(obj) is 'object'
+        delete obj._id if obj._id
+        nu = {}
+        ( nu[k] = deidentify(v) for k, v of obj )
+        return nu
+    obj
+
 # ----------------------------------------------------------------------------------------------------
 
 describe 'Ledger', ->
@@ -49,7 +60,7 @@ describe 'Ledger', ->
             # Post a new transaction.
             ).then( ->
                 client.addTransaction 'user:radek',
-                    'transactions':
+                    'transfers':
                         'user:radek': [
                             {
                                 'amount':      -10.00
@@ -60,20 +71,23 @@ describe 'Ledger', ->
 
             # Get a list of transactions for a user.
             ).then( ->
-                client.getTransactions('user:radek').then( (transactions) ->
+                client.getTransactions('user:radek').then( (results) ->
                     # Does the response match?
-                    expect(transactions).to.deep.equal [
-                        {
-                            'transactions':
-                                'user:radek': [
-                                    {
-                                        'amount':      -10.00
-                                        'account_id':  'hsbc'
-                                        'description': 'Apple'
-                                    }
-                                ]
-                        }
-                    ]
+                    expect(deidentify results).to.deep.equal
+                        'accounts':
+                            'hsbc': -10
+                        'transactions': [
+                            {
+                                'transfers':
+                                    'user:radek': [
+                                        {
+                                            'amount':      -10.00
+                                            'account_id':  'hsbc'
+                                            'description': 'Apple'
+                                        }
+                                    ]
+                            }
+                        ]
                 )
 
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
