@@ -6,7 +6,7 @@ Q        = require 'q'
 CONFIG = {}
 DB     = null
 
-exports.start = (port, done) ->
+exports.startServer = (port=5000, dir='public', done) ->
     # Setup.
     CONFIG.port = process.env.PORT or port
     CONFIG.env = process.env.NODE_ENV or 'production'
@@ -86,4 +86,4 @@ exports.start = (port, done) ->
     # Start Flatiron on port.
     app.start CONFIG.port, (err) ->
         throw err if err
-        done app
+        if done and typeof(done) is 'function' then done app

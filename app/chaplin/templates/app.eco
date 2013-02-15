@@ -1,0 +1,36 @@
+<div id="wrapper">
+    <!-- header, account etc. -->
+    <header id="top">
+        <div class="inner">
+            <div class="account right">
+                Monsieur Tout-le-Monde <span>&#8226;</span> <a>Logout</a>
+            </div>
+            <a href="/"><h1>InterMine Steps <span>&alpha;</span></h1></a>
+        </div>
+    </header>
+
+    <section id="middle">
+        <!-- new tools -->
+        <aside id="left"></aside>
+        <!-- the tool -->
+        <div id="widget"></div>
+        <!-- from here -->
+        <aside id="right"></aside>
+    </section>
+</div>
+
+<!-- show when we want to hide the app (but say not the history) -->
+<div id="whiteout"></div>
+
+<!-- tools used in the history -->
+<div id="history"></div>
+
+<!-- history toggler fixed to bottom -->
+<footer id="bottom">
+    <div class="wrap">
+        <a class="button" data-action="history-toggle">Show history</a>
+    </div>
+</footer>
+
+<!-- finally the almighty modal -->
+<div id="modal"></div>

@@ -1,10 +1,10 @@
-expect         = require('chai').expect
-Q              = require 'q'
+expect          = require('chai').expect
+Q               = require 'q'
 
-request        = require 'request'
+request         = require 'request'
 
-{ start }      = require '../index'
-{ genericise } = require './helper.coffee'
+{ startServer } = require '../index.js'
+{ genericise }  = require './helper.coffee'
 
 url = 'http://127.0.0.1:2120'
 
@@ -12,7 +12,7 @@ url = 'http://127.0.0.1:2120'
 
 describe 'Transaction', ->
 
-    before (done) -> start 2120, (app) -> done()
+    before (done) -> startServer 2120, null, (app) -> done()
 
     beforeEach (done) ->
         request
