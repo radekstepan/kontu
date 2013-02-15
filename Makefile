@@ -1,6 +1,6 @@
 REPORTER = spec
 
-test:
+test: cs-compile
 	@NODE_ENV=test ./node_modules/.bin/mocha --compilers coffee:coffee-script --reporter $(REPORTER)
 
 test-cov: prep-coverage
