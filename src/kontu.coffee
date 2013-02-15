@@ -41,7 +41,11 @@ errorHandler = (res, err) ->
     code = err.code or 400
     # Is the error a string or an object.
     if typeof(err) is 'object'
-        message = err.message or 'Error'
+        # Error type?
+        if err.name and err.message
+            message = err.name + ': ' + err.message
+        else
+            message = err.message or 'Error'
     else
         message = err
 
@@ -168,9 +172,7 @@ exports.transactions = ->
                 # Is this us?
                 unless user_id is user.id
                     # Do we share an account with this user?
-                    if user_id + ':debtor' in user.accounts or user_id + ':creditor' in user.accounts
-                        console.log 'a debtor/creditor'
-                    else
+                    unless user.accounts[user_id + ':debtor'] or user.accounts[user_id + ':creditor']
                         throw "Cannot add transaction for user `#{user_id}`"
 
             [ user, collections ]
@@ -263,6 +265,65 @@ exports.transactions = ->
 
         ).done( (results) ->
             successHandler res, results
+        , (err) ->
+            errorHandler res, err
+        )
+
+exports.invite = ->
+    ###
+    Allow a user to share expenses with us.
+    ###
+    @post ->
+        req = @req ; res = @res
+
+        # Check API Key.
+        Q.fcall( ->
+            checkAPIKey req.headers['x-apikey']
+
+        # Check the format of req and if the other user exists.
+        ).then( ([ user1, collections ]) ->
+            # Do we have the user id?
+            unless user_id = req.body.user_id
+                throw 'Need to provide `user_id` parameter'
+
+            # Sharing with ourselves?
+            if user_id is user1.id
+                throw 'You cannot share an account with yourself'
+
+            # Get the second user.
+            def = Q.defer()
+            collections.users.findOne { 'id': user_id }, (err, doc) ->
+                if err then def.reject err
+                if !doc then def.reject { 'code': 403, 'message': "User `#{user_id}` not found" }
+                def.resolve [ user1, doc, collections ]
+            def.promise
+
+        # Save the debtor, creditor accounts.
+        ).then( ([ user1, user2, collections ]) ->
+            # Check we do not have the creditor account already.
+            if user1.accounts[user2.id + ':creditor']
+                throw "User #{user1.id} already has a creditor account with `#{user2.id}`"
+            else
+                user1.accounts[user2.id + ':creditor'] = { 'type': 201 }
+            
+            # Check we do not have the debtor account already.
+            if user2.accounts[user1.id + ':debtor']
+                throw "User #{user2.id} already has a debtor account with `#{user1.id}`"
+            else
+                user2.accounts[user1.id + ':debtor'] = { 'type': 103 }
+
+            # Insert the updated user.
+            update = (user) ->
+                def = Q.defer()
+                collections.users.update { 'id': user.id }, user, { 'safe': true }, (err) ->
+                    if err then def.reject err
+                    def.resolve()
+                def.promise
+
+            Q.all [ update(user1), update(user2) ]
+
+        ).done( ->
+            successHandler res
         , (err) ->
             errorHandler res, err
         )

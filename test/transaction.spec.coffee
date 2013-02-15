@@ -1,10 +1,10 @@
-expect          = require('chai').expect
-Q               = require 'q'
+expect         = require('chai').expect
+Q              = require 'q'
 
-request         = require 'request'
+request        = require 'request'
 
-{ start }       = require '../index'
-{ genericise }  = require './helper.coffee'
+{ start }      = require '../index'
+{ genericise } = require './helper.coffee'
 
 url = 'http://127.0.0.1:2120'
 
@@ -21,7 +21,7 @@ describe 'Transaction', ->
         , -> done()
 
     describe 'add', ->
-        it 'for simple transactions', (done) ->
+        it 'success for simple transactions', (done) ->
             # Create user.
             Q.fcall( ->
                 def = Q.defer()
@@ -33,7 +33,7 @@ describe 'Transaction', ->
                         'api_key': 'key:user:radek'
                 , (err, res, body) ->
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject res.message
+                    else def.reject body.message
                 def.promise
             
             # Create an account for the user.
@@ -49,7 +49,7 @@ describe 'Transaction', ->
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject res.message
+                    else def.reject body.message
                 def.promise
 
             # Post a new transaction.
@@ -72,7 +72,7 @@ describe 'Transaction', ->
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject res.message
+                    else def.reject body.message
                 def.promise
 
             # Get a list of transactions for a user.
@@ -86,7 +86,7 @@ describe 'Transaction', ->
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
                     if res.statusCode is 200 then def.resolve body
-                    else def.reject res.message
+                    else def.reject body.message
                 def.promise
 
             ).then( (results) ->
@@ -103,6 +103,191 @@ describe 'Transaction', ->
                                             'amount':      -10.00
                                             'account_id':  'hsbc'
                                             'description': 'Apple'
+                                        }
+                                    ]
+                            }
+                        ]
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+        it 'success for shared transactions', (done) ->
+            # Create user 1.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+            
+            # Create user 2.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:barbora'
+                        'api_key': 'key:user:barbora'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Allow user 1 to share expenses with user 2.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/invite'
+                    'json':
+                        'user_id': 'user:radek'
+                    'headers':
+                        'x-apikey': 'key:user:barbora'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Create an account for user 1.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':   'hsbc'
+                        'type': 102
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Post a new transaction.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/transactions'
+                    'json':
+                        'created': (new Date()).getTime()
+                        'transfers':
+                            'user:radek': [
+                                {
+                                    'amount':      -10.00
+                                    'account_id':  'hsbc'
+                                    'description': 'Apple'
+                                }, {
+                                    'amount':      4.00
+                                    'account_id':  'user:barbora:debtor'
+                                    'description': 'Apple paid by Radek'
+                                }
+                            ]
+                            'user:barbora': [
+                                {
+                                    'amount':      -4.00
+                                    'account_id':  'user:radek:creditor'
+                                    'description': 'Loan for Apple'
+                                }
+                            ]
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Get a list of transactions for user1.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'GET'
+                    'url': url + '/api/transactions'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            ).then( (results) ->
+                # Does the response match?
+                expect(genericise results).to.deep.equal
+                    'results':
+                        'accounts':
+                            'hsbc':                -10
+                            'user:barbora:debtor': 4
+                        'transactions': [
+                            {
+                                'transfers':
+                                    'user:radek': [
+                                        {
+                                            'amount':      -10.00
+                                            'account_id':  'hsbc'
+                                            'description': 'Apple'
+                                        }, {
+                                            'amount':      4.00
+                                            'account_id':  'user:barbora:debtor'
+                                            'description': 'Apple paid by Radek'
+                                        }
+                                    ]
+                                    'user:barbora': [
+                                        {
+                                            'amount':      -4.00
+                                            'account_id':  'user:radek:creditor'
+                                            'description': 'Loan for Apple'
+                                        }
+                                    ]
+                            }
+                        ]
+
+            # Get a list of transactions for user2.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'GET'
+                    'url': url + '/api/transactions'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:barbora'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            ).then( (results) ->
+                # Does the response match?
+                expect(genericise results).to.deep.equal
+                    'results':
+                        'accounts':
+                            'user:radek:creditor': -4
+                        'transactions': [
+                            {
+                                'transfers':
+                                    'user:radek': [
+                                        {
+                                            'amount':      -10.00
+                                            'account_id':  'hsbc'
+                                            'description': 'Apple'
+                                        }, {
+                                            'amount':      4.00
+                                            'account_id':  'user:barbora:debtor'
+                                            'description': 'Apple paid by Radek'
+                                        }
+                                    ]
+                                    'user:barbora': [
+                                        {
+                                            'amount':      -4.00
+                                            'account_id':  'user:radek:creditor'
+                                            'description': 'Loan for Apple'
                                         }
                                     ]
                             }

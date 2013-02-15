@@ -50,6 +50,7 @@ exports.start = (port, done) ->
 
     app.router.path '/api/users',        kontu.users
     app.router.path '/api/accounts',     kontu.accounts
+    app.router.path '/api/invite',       kontu.invite
     app.router.path '/api/transactions', kontu.transactions
 
     # Cleanup the collections in a database.
