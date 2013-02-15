@@ -31,6 +31,8 @@ class Kontu
             '/:id':
                 # Update a specific account.
                 put: (id) -> account.put @req, @res, id
+                # Delete a specific account.
+                delete: (id) -> account.delete @req, @res, id
         
         transaction = new Transaction @
         @transaction =

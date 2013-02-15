@@ -344,3 +344,136 @@ describe 'Account', ->
                                 'difference': 25.67
 
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+        it 'fail removing account that has transactions', (done) ->
+            # Create user.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                        'currency': 'GBP'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+            
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
+                        'difference': 15.67
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Post a new transaction.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/transactions'
+                    'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
+                        'created': (new Date()).getTime()
+                        'transfers':
+                            'user:radek': [
+                                {
+                                    'amount':      -10.00
+                                    'account_id':  'hsbc'
+                                    'currency':    'GBP'
+                                    'description': 'Apple'
+                                }
+                            ]
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Delete the account
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'DELETE'
+                    'url': url + '/api/accounts/hsbc'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode isnt 200 then def.resolve()
+                    else def.reject body
+                def.promise
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+        it 'success removing account with no transactions', (done) ->
+            # Create user.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                        'currency': 'GBP'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+            
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
+                        'difference': 15.67
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Delete the account
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'DELETE'
+                    'url': url + '/api/accounts/hsbc'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve()
+                    else def.reject body.message
+                def.promise
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))

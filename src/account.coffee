@@ -156,4 +156,49 @@ class Account
             @kontu.error res, err
         )
 
+    ###
+    Delete an account.
+    ###
+    delete: (req, res, id) =>
+        # Check API Key.
+        Q.fcall( =>
+            @kontu.checkApi req.headers['x-apikey']
+
+        # Get the data.
+        ).then( ([ user, collections ]) ->
+            # Do we recognize the account on us?
+            unless user.accounts[id] then throw "Account `#{id}` not recognized"
+
+            # Remove it from the user.
+            delete user.accounts[id]
+
+            [ user, collections ]
+
+        # Is the account involved in any transactions?
+        ).then( ([ user, collections ]) ->
+            q = {}
+            q["transfers.#{user.id}.account_id"] = id
+
+            def = Q.defer()
+            collections.ledger.find(q).toArray (err, docs) ->
+                if err then return def.reject err
+                if docs.length isnt 0 then return def.reject { 'message': "Account `#{id}` involved in transactions" }
+                def.resolve [ user, collections ]
+            def.promise
+
+        # Update the user without the account.
+        ).then( ([ user, collections ]) ->
+            def = Q.defer()
+
+            collections.users.update { 'id': user.id }, user, { 'safe': true }, (err) ->
+                if err then return def.reject err
+                def.resolve()
+            def.promise
+
+        ).done( =>
+            @kontu.success res
+        , (err) =>
+            @kontu.error res, err
+        )
+
 module.exports = Account
