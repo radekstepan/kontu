@@ -4,9 +4,15 @@
     "dependencies": {
         "mocha": "1.8.1",
         "chai": "1.4.2",
-        "coffee-script": "1.4.0"
+        "coffee-script": "1.4.0",
+        "flatiron": "0.3.3",
+        "union": "0.3.6",
+        "mongodb": "1.2.9",
+        "request": "2.12.0",
+        "querystring": "0.1.0",
+        "q": "0.8.12"
     },
     "scripts": {
-        "test": "clear ; ./node_modules/.bin/mocha --compilers coffee:coffee-script --ui bdd"
+        "test": "clear ; NODE_ENV=test ./node_modules/.bin/mocha --compilers coffee:coffee-script --ui bdd"
     }
 }
