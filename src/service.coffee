@@ -1,5 +1,8 @@
 flatiron = require 'flatiron'
+union    = require 'union'
 director = require 'director'
+connect  = require 'connect'
+send     = require 'send'
 mongodb  = require 'mongodb'
 Q        = require 'q'
 
@@ -16,7 +19,23 @@ exports.startServer = (port=5000, dir='public', done) ->
 
     app = flatiron.app
 
-    app.use flatiron.plugins.http
+    app.use flatiron.plugins.http,
+        'before': [
+            # Have a nice favicon.
+            connect.favicon()
+            # Static file serving.
+            connect.static "./#{dir}"
+        ]
+        'onError': (err, req, res) ->
+            if err.status is 404
+                # Silently serve the root of the client app.
+                send(req, 'index.html')
+                    .root("./#{dir}")
+                    .on('error', union.errorHandler)
+                    .pipe(res)
+            else
+                # Go Union!
+                union.errorHandler err, req, res
 
     # Use MongoDB.
     app.use

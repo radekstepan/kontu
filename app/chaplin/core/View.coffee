@@ -15,14 +15,11 @@ module.exports = class View extends Chaplin.View
 
     afterRender: ->
         super
-        # console.green "+#{@cid} #{@constructor.name}"
-
+        
         # Add our cid.
         $(@el).attr 'data-cid', @cid
 
     dispose: ->
-        # console.red "-#{@cid} #{@constructor.name}"
-
         # Cleanup Views.
         ( v?.dispose() for v in @views )
 

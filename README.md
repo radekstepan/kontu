@@ -1,4 +1,4 @@
-# kontu
+# Kontu
 
 To run the app in `ukraine` cloud:
 
@@ -6,13 +6,13 @@ To run the app in `ukraine` cloud:
 $ node index.js
 ```
 
-To start the app in dev mode using Brunch:
+To start the app in Chaplin app dev mode using Brunch:
 
 ```bash
 $ NODE_ENV=dev node index.js
 ```
 
-To compile the code from CoffeeScript:
+To compile the API code from CoffeeScript to JavaScript:
 
 ```bash
 $ make cs-compile
