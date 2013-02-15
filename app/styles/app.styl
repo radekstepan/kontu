@@ -1,11 +1,46 @@
-@font-face
-    font-family: 'Entypo'
-    font-style: normal
-    font-weight: 400
-    src: url('../fonts/Entypo.woff') format('woff'),
-    url('../fonts/Entypo.eot') format('eot'),
-    url('../fonts/Entypo.ttf') format('truetype'),
-    url('../fonts/Entypo.svg') format('svg')
+html, body
+    font-family: "ProximaNova-Regular"
+
+ul
+    list-style-type: none
+
+h1
+    font-family: "ProximaNova-Bold"
+
+h2
+    font-family: "ProximaNova-Semibold"
+
+.row
+    width: auto
+
+#sidebar
+    background: #383B40
+    width: 10%
+    float: left
+
+#main
+    width: 90%
+    float: left
+
+#assets
+    background: #1F478C
+    color: #FFF
+
+#liabilities
+    background: #C6101D
+    color: #FFF
+
+.accounts
+    div
+        border-top: 1px solid #FFF
+        display: inline-block
+        margin: 0 10px 10px 10px
+
+        &.big
+            border-width: 4px
+
+            h2
+                font-size: 16px
 
 .entypo
     &:before
@@ -16,66 +51,3 @@
         content: "\e761"
     &.chevron-small-right:before
         content: "\e762"
-
-@font-face
-    font-family: 'Noticia Text'
-    font-style: normal;
-    font-weight: 400;
-    src: local('Noticia Text'), local('NoticiaText-Regular'), url('../fonts/NoticiaText.woff') format('woff');
-
-@font-face
-    font-family: 'Strait'
-    font-style: normal
-    font-weight: 400
-    src: local('Strait'), local('Strait-Regular'), url('../fonts/Strait.woff') format('woff')
-
-body
-    background: url('../img/dust.png')
-    padding: 20px
-
-table
-    width: 100%
-
-ul
-    list-style-type: none
-
-a
-    cursor: pointer
-
-header
-    h1
-        font-family: 'Noticia Text'
-        font-size: 38px
-        margin: 0 20px 0 0
-
-    #month > *
-        display: inline-block
-        vertical-align: bottom
-
-table#ledger
-    margin-top: 20px
-    border-collapse: collapse
-
-    tbody
-        tr
-            td
-                padding: 12px
-                font-size: 14px
-
-                &.money
-                    text-align: right
-
-#accounts
-    margin-top: 20px
-
-    h2
-        font-family: 'Noticia Text'
-        font-size: 22px
-        margin: 0 0 10px 0
-
-    li
-        span.checkbox
-            cursor: pointer
-
-        span.right
-            margin-left: 10px
