@@ -5,7 +5,7 @@ Q              = require 'q'
 { NodeClient } = require '../node-client.coffee'
 
 # New client.
-client         = new NodeClient 'http://127.0.0.1:2121'
+client         = new NodeClient 'http://127.0.0.1:2120'
 
 # Cleanup the collection in the database.
 clean = (collection) ->
@@ -24,15 +24,22 @@ clean = (collection) ->
         def.promise
     )
 
-# Remove `_id` coming from MongoDB.
-deidentify = (obj) ->
+# Remove `_id`, timestamps coming from MongoDB.
+genericise = (obj) ->
+    blacklist = [ '_id', 'created' ]
+    # Array.
     if obj instanceof Array
-        return ( deidentify(row) for row in obj )
+        return ( genericise(row) for row in obj )
+    # Object.
     if typeof(obj) is 'object'
-        delete obj._id if obj._id
+        # Remove the blacklisted keys.
+        for blk in blacklist
+            if obj[blk] then delete obj[blk]
+        # Go inside.
         nu = {}
-        ( nu[k] = deidentify(v) for k, v of obj )
+        ( nu[k] = genericise(v) for k, v of obj )
         return nu
+    # Rest...
     obj
 
 # ----------------------------------------------------------------------------------------------------
@@ -40,7 +47,7 @@ deidentify = (obj) ->
 describe 'Ledger', ->
 
     before (done) ->
-        start 2121, (app) ->
+        start 2120, (app) ->
             app.db (collections) ->
                 Q.all([ clean(collections.users), clean(collections.ledger) ]).done(( -> done() ), done)
 
@@ -60,6 +67,7 @@ describe 'Ledger', ->
             # Post a new transaction.
             ).then( ->
                 client.addTransaction 'user:radek',
+                    'created': (new Date()).getTime()
                     'transfers':
                         'user:radek': [
                             {
@@ -73,7 +81,7 @@ describe 'Ledger', ->
             ).then( ->
                 client.getTransactions('user:radek').then( (results) ->
                     # Does the response match?
-                    expect(deidentify results).to.deep.equal
+                    expect(genericise results).to.deep.equal
                         'accounts':
                             'hsbc': -10
                         'transactions': [

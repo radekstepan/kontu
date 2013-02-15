@@ -157,6 +157,13 @@ exports.transactions = ->
         
         # Do we know all the accounts and users?.
         ).then( ([ user, collections ]) ->
+            # Do we have a timestamp saved?
+            time = req.body.created
+            unless time
+                throw 'Need to provide timestamp in `created`'
+            unless time % 1 is 0
+                throw 'Timestamp `created` not properly formatted'
+
             for user_id, list of req.body.transfers
                 # Is this us?
                 unless user_id is user.id
