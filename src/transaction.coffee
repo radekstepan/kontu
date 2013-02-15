@@ -60,7 +60,7 @@ class Transaction
                         unless not isNaN(parseFloat(transfer.amount)) and isFinite(transfer.amount)
                             def.reject { 'message': "`#{transfer.amount}` is not a number" }
                         # OK, is the amount a 'correct' number?
-                        if parseFloat(transfer.amount.toFixed(2)) isnt transfer.amount
+                        if parseFloat((parseFloat(transfer.amount)).toFixed(2)) isnt transfer.amount
                             def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
                         # Does the account exist?
                         unless accounts[user_id][transfer.account_id]

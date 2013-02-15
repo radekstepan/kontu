@@ -1,5 +1,4 @@
 expect         = require('chai').expect
-Q              = require 'q'
 
 request        = require 'request'
 
