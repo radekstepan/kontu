@@ -1,11 +1,12 @@
 require('chai').should()
 
-Q         = require 'q'
-request   = require 'request'
+Q              = require 'q'
 
-{ start } = require '../service.coffee'
+{ start }      = require '../service.coffee'
+{ NodeClient } = require '../node-client.coffee'
 
-url = 'http://127.0.0.1:2121'
+# New client.
+client         = new NodeClient 'http://127.0.0.1:2121'
 
 # Cleanup the collection in the database.
 clean = (collection) ->
@@ -26,52 +27,6 @@ clean = (collection) ->
 
 # ----------------------------------------------------------------------------------------------------
 
-# Create a user.
-addUser = (user_id) ->
-    def = Q.defer()
-    request
-        'method': 'POST'
-        'url': url + '/api/users'
-        'json':
-            'id':      user_id
-            'api_key': 'key:'  + user_id
-    , (err, res, body) ->
-        if err then def.reject err
-        if res.statusCode isnt 200 then def.reject body.message
-        def.resolve()
-    def.promise
-
-addAccount = (user_id, account) ->
-    def = Q.defer()
-    request
-        'method': 'POST'
-        'url': url + '/api/accounts'
-        'json': account
-        'headers':
-            'x-apikey': 'key:' + user_id
-    , (err, res, body) ->
-        if err then def.reject err
-        if res.statusCode isnt 200 then def.reject body.message
-        def.resolve()
-    def.promise
-
-addTransaction = (user_id, transactions) ->
-    def = Q.defer()
-    request
-        'method': 'POST'
-        'url': url + '/api/transactions'
-        'json':
-            'transactions': transactions
-        'headers':
-            'x-apikey': 'key:' + user_id
-    , (err, res, body) ->
-        if err then def.reject err
-        if res.statusCode isnt 200 then def.reject body.message
-        def.resolve()
-    def.promise
-
-# ----------------------------------------------------------------------------------------------------
-
 describe 'Ledger', ->
 
     before (done) ->
@@ -84,17 +39,17 @@ describe 'Ledger', ->
             
             # Create user.
             Q.fcall( ->
-                addUser 'user:radek'
+                client.addUser 'user:radek'
             
             # Create an account for the user.
             ).then( ->
-                addAccount 'user:radek',
+                client.addAccount 'user:radek',
                     'id':   'hsbc'
                     'type': 102
 
             # Post a new transaction.
             ).then( ->
-                addTransaction 'user:radek',
+                client.addTransaction 'user:radek',
                     'user:radek': [
                         {
                             'amount':      -10.00
