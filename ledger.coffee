@@ -6,6 +6,51 @@ db = null
 # Set db access.
 exports.app = (app) -> db = app.db
 
+# Check that API Key is valid.
+checkAPIKey = (api_key) ->
+    # Which user is this for?
+    Q.fcall( ->
+        # Provided key?
+        unless api_key then throw { 'message': 'API key not provided' }
+        else api_key
+    
+    # Gives us db access.
+    ).then( (api_key) ->
+        def = Q.defer()
+        db (collections) -> def.resolve [ api_key, collections ]
+        def.promise
+    
+    # Check we know this user.
+    ).then( ([ api_key, collections ]) ->
+        def = Q.defer()
+        collections.users.findOne { 'api_key': api_key }, (err, doc) ->
+            if err then def.reject err
+            if !doc then def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
+            def.resolve [ doc, collections ]
+        def.promise
+    )
+
+# Promise fulfilled.
+successHandler = (res) ->
+    res.writeHead 200, 'content-type': 'application/json'
+    res.end()
+
+# Promise not fulfilled.
+errorHandler = (res, err) ->
+    code = err.code or 400
+    # Is the error a string or an object.
+    if typeof(err) is 'object'
+        message = err.message or 'Error'
+    else
+        message = err
+
+    # Respond.
+    res.writeHead code, 'content-type': 'application/json'
+    res.write JSON.stringify 'message': message
+    res.end()
+
+# ----------------------------------------------------------------------------------------------------
+
 exports.users = ->
     ###
     Save a new user.
@@ -48,23 +93,10 @@ exports.users = ->
                 def.resolve user
             def.promise
 
-        ).done( (user) ->
-            # Respond.
-            res.writeHead 200, 'content-type': 'application/json'
-            res.write JSON.stringify 'message': "User `#{user.id}` created"
-            res.end()
+        ).done( ->
+            successHandler res
         , (err) ->
-            code = err.code or 400
-            # Is the error a string or an object.
-            if typeof(err) is 'object'
-                message = err.message or 'Error'
-            else
-                message = err
-
-            # Respond.
-            res.writeHead code, 'content-type': 'application/json'
-            res.write JSON.stringify 'message': message
-            res.end()
+            errorHandler res, err
         )
 
 exports.accounts = ->
@@ -74,27 +106,9 @@ exports.accounts = ->
     @post ->
         req = @req ; res = @res
         
-        # Which user is this for?
+        # Check API Key.
         Q.fcall( ->
-            api_key = req.headers['x-apikey']
-            # Provided key?
-            unless api_key then throw { 'message': 'API key not provided' }
-            else api_key
-        
-        # Gives us db access.
-        ).then( (api_key) ->
-            def = Q.defer()
-            db (collections) -> def.resolve [ api_key, collections ]
-            def.promise
-        
-        # Check we know this user.
-        ).then( ([ api_key, collections ]) ->
-            def = Q.defer()
-            collections.users.findOne { 'api_key': api_key }, (err, doc) ->
-                if err then def.reject err
-                if !doc then def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
-                def.resolve [ doc, collections ]
-            def.promise
+            checkAPIKey req.headers['x-apikey']
 
         # Check if doc matches the spec.
         ).then( ([ user, collections ]) ->
@@ -123,22 +137,10 @@ exports.accounts = ->
                 def.resolve()
             def.promise
 
-        ).done( (doc) ->
-            # Respond.
-            res.writeHead 200, 'content-type': 'application/json'
-            res.end()
+        ).done( ->
+            successHandler res
         , (err) ->
-            code = err.code or 400
-            # Is the error a string or an object.
-            if typeof(err) is 'object'
-                message = err.message or 'Error'
-            else
-                message = err
-
-            # Respond.
-            res.writeHead code, 'content-type': 'application/json'
-            res.write JSON.stringify 'message': message
-            res.end()
+            errorHandler res, err
         )
 
 exports.transactions = ->
@@ -148,27 +150,9 @@ exports.transactions = ->
     @post ->
         req = @req ; res = @res
         
-        # Which user is this for?
+        # Check API Key.
         Q.fcall( ->
-            api_key = req.headers['x-apikey']
-            # Provided key?
-            unless api_key then throw { 'message': 'API key not provided' }
-            else api_key
-        
-        # Gives us db access.
-        ).then( (api_key) ->
-            def = Q.defer()
-            db (collections) -> def.resolve [ api_key, collections ]
-            def.promise
-        
-        # Check we know this user.
-        ).then( ([ api_key, collections ]) ->
-            def = Q.defer()
-            collections.users.findOne { 'api_key': api_key }, (err, doc) ->
-                if err then def.reject err
-                if !doc then def.reject { 'code': 403, 'message': "API key `#{api_key}` is not allowed" }
-                def.resolve [ doc, collections ]
-            def.promise
+            checkAPIKey req.headers['x-apikey']
         
         # Do we know all the accounts and users?.
         ).then( ([ user, collections ]) ->
@@ -224,23 +208,10 @@ exports.transactions = ->
             collections.ledger.insert req.body, { 'safe': true }, (err, doc) ->
                 if err then def.reject err
                 def.resolve doc
-            def.promise            
+            def.promise
 
-        ).done( (doc) ->
-            # Respond.
-            res.writeHead 200, 'content-type': 'application/json'
-            res.write JSON.stringify 'transaction_id': doc._id
-            res.end()
+        ).done( ->
+            successHandler res
         , (err) ->
-            code = err.code or 400
-            # Is the error a string or an object.
-            if typeof(err) is 'object'
-                message = err.message or 'Error'
-            else
-                message = err
-
-            # Respond.
-            res.writeHead code, 'content-type': 'application/json'
-            res.write JSON.stringify 'message': message
-            res.end()
+            errorHandler res, err
         )
