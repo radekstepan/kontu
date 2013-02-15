@@ -99,8 +99,15 @@ exports.transactions = ->
         # Do we know all the accounts and users?.
         ).then( (user) ->
             for user_id, list of req.body.transactions
-                if (user_id not user.id) and (not user.accounts[user_id])
-                    throw "Unknown user `#{user_id}`"
+                # This is us.
+                if user_id is user.id
+                    1
+                # Do we share an account with this user?
+                else
+                    if user_id + ':debtor' in user.accounts or user_id + ':creditor' in user.accounts
+                        1
+                    else
+                        throw "Cannot add transaction for user `#{user_id}`"
 
         ).done( ->
             # Respond.
