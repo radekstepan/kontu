@@ -31,8 +31,9 @@ checkAPIKey = (api_key) ->
     )
 
 # Promise fulfilled.
-successHandler = (res) ->
+successHandler = (res, results='ok') ->
     res.writeHead 200, 'content-type': 'application/json'
+    res.write JSON.stringify 'results': results
     res.end()
 
 # Promise not fulfilled.
@@ -212,6 +213,33 @@ exports.transactions = ->
 
         ).done( ->
             successHandler res
+        , (err) ->
+            errorHandler res, err
+        )
+
+    ###
+    Get transactions.
+    ###
+    @get ->
+        req = @req ; res = @res
+
+        # Check API Key.
+        Q.fcall( ->
+            checkAPIKey req.headers['x-apikey']
+
+        # Get the data.
+        ).then( ([ user, collections ]) ->
+            q = {}
+            q["transactions.#{user.id}"] = '$exists': true
+
+            def = Q.defer()
+            collections.ledger.find(q).toArray (err, docs) ->
+                if err then def.reject err
+                def.resolve docs
+            def.promise
+
+        ).done( (docs) ->
+            successHandler res, docs
         , (err) ->
             errorHandler res, err
         )

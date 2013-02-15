@@ -1,5 +1,4 @@
-require('chai').should()
-
+expect         = require('chai').expect
 Q              = require 'q'
 
 { start }      = require '../service.coffee'
@@ -20,7 +19,7 @@ clean = (collection) ->
         def = Q.defer()
         collection.find({}).toArray (err, results) ->
             if err then def.reject err
-            results.should.have.property('length').equal(0)
+            expect(results).to.have.length(0)
             def.resolve()
         def.promise
     )
@@ -50,11 +49,31 @@ describe 'Ledger', ->
             # Post a new transaction.
             ).then( ->
                 client.addTransaction 'user:radek',
-                    'user:radek': [
+                    'transactions':
+                        'user:radek': [
+                            {
+                                'amount':      -10.00
+                                'account_id':  'hsbc'
+                                'description': 'Apple'
+                            }
+                        ]
+
+            # Get a list of transactions for a user.
+            ).then( ->
+                client.getTransactions('user:radek').then( (transactions) ->
+                    # Does the response match?
+                    expect(transactions).to.deep.equal [
                         {
-                            'amount':      -10.00
-                            'account_id':  'hsbc'
-                            'description': 'Apple'
+                            'transactions':
+                                'user:radek': [
+                                    {
+                                        'amount':      -10.00
+                                        'account_id':  'hsbc'
+                                        'description': 'Apple'
+                                    }
+                                ]
                         }
                     ]
+                )
+
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
