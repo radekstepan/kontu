@@ -45,13 +45,13 @@ exports.start = (port, done) ->
                     done DB
 
     # Require & set our app.
-    kontu = require './kontu'
-    kontu.app app
+    Kontu = require './kontu'
+    kontu = new Kontu app.db
 
-    app.router.path '/api/users',        kontu.users
-    app.router.path '/api/accounts',     kontu.accounts
+    app.router.path '/api/users',        kontu.user
     app.router.path '/api/invite',       kontu.invite
-    app.router.path '/api/transactions', kontu.transactions
+    app.router.path '/api/accounts',     kontu.account
+    app.router.path '/api/transactions', kontu.transaction
 
     # Cleanup the collections in a database.
     if CONFIG.env is 'test'
