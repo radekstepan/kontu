@@ -13,15 +13,31 @@ class Transaction
             @kontu.checkApi req.headers['x-apikey']
         
         # Do we know all the accounts and users?.
-        ).then( ([ user, collections ]) ->
+        ).then( ([ user, collections ]) =>
             # Do we have a timestamp saved?
-            time = req.body.created
-            unless time
+            transaction = req.body
+            unless transaction.created
                 throw 'Need to provide timestamp in `created`'
-            unless time % 1 is 0
+            unless transaction.created % 1 is 0
                 throw 'Timestamp `created` not properly formatted'
 
-            for user_id, list of req.body.transfers
+            # Have we provided amount and currency?
+            for key in [ 'amount', 'currency' ]
+                unless transaction[key] then throw "Did not provide `#{key}` key"
+
+            # Is the amount an actual number?
+            unless not isNaN(parseFloat(transaction.amount)) and isFinite(transaction.amount)
+                throw "`#{transaction.amount}` is not a number"
+            # OK, is the amount a 'correct' number?
+            if parseFloat((parseFloat(transaction.amount)).toFixed(2)) isnt transaction.amount
+                throw "`#{transaction.amount}` is not correctly formatted"
+
+            # Do we know this currency?
+            transaction.currency = transaction.currency.toUpperCase() # match on case
+            unless transaction.currency in @kontu.currencies
+                throw "Unknown currency `#{transaction.currency}`"
+
+            for user_id, list of transaction.transfers
                 # Is this us?
                 unless user_id is user.id
                     # Do we share an account with this user?
@@ -31,7 +47,7 @@ class Transaction
             [ user, collections ]
 
         # Now check that all the accounts mentioned in the transaction exist and transfers are correctly formatted.
-        ).then( ([ user, collections ]) ->
+        ).then( ([ user, collections ]) =>
             def = Q.defer()
             
             users = Object.keys(req.body.transfers)
@@ -39,7 +55,7 @@ class Transaction
             # Get all of the users in question.
             collections.users.find(
                 '$or': ( { 'id': u } for u in users )
-            ).toArray (err, docs) ->
+            ).toArray (err, docs) =>
                 if err then def.reject err
                 # Correct count? Just double checking...
                 if docs.length isnt users.length
@@ -52,19 +68,29 @@ class Transaction
                 # Check that all the accounts in the request exist in the appropriate users.
                 for user_id, list of req.body.transfers
                     for transfer in list
-                        # Check that we have an account and amount saved.
-                        for key in  [ 'account_id', 'amount' ]
+                        # Check that we have an account, amount and currency saved.
+                        for key in [ 'account_id', 'amount', 'currency' ]
                             unless transfer[key]
                                 def.reject { 'message': "Need to provide `#{key}` in a tranfer" }
+                        
                         # Is the amount an actual number?
                         unless not isNaN(parseFloat(transfer.amount)) and isFinite(transfer.amount)
                             def.reject { 'message': "`#{transfer.amount}` is not a number" }
                         # OK, is the amount a 'correct' number?
                         if parseFloat((parseFloat(transfer.amount)).toFixed(2)) isnt transfer.amount
                             def.reject { 'message': "`#{transfer.amount}` is not correctly formatted" }
+                        
+                        # Do we know this currency?
+                        transfer.currency = transfer.currency.toUpperCase() # match on case
+                        unless transfer.currency in @kontu.currencies
+                            def.reject { 'message': "Unknown currency `#{transfer.currency}`" }
+
                         # Does the account exist?
                         unless accounts[user_id][transfer.account_id]
                             def.reject { 'message': "User `#{user_id}` does not have account `#{transfer.account_id}`" }
+
+                        # Do we match on currency?
+                        
 
                 def.resolve collections
 

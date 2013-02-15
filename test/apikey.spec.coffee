@@ -35,8 +35,9 @@ describe 'API Key', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':  'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'currency': 'GBP'
+                        'type':     102
                 , (err, res, body) ->
                     if res.statusCode isnt 200 then done()
                     else done new Error 'Success, is bad...'
@@ -56,8 +57,9 @@ describe 'API Key', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':  'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'currency': 'GBP'
+                        'type':     102
                     'headers':
                         'x-apikey': 'key:user:test'
                 , (err, res, body) ->

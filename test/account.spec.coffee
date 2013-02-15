@@ -27,8 +27,9 @@ describe 'Account', ->
                 'method': 'POST'
                 'url': url + '/api/accounts'
                 'json':
-                    'id':   'hsbc'
-                    'type': 102
+                    'id':       'hsbc'
+                    'type':     102
+                    'currency': 'GBP'
                 'headers':
                     'x-apikey': 'key:user:radek'
             , (err, res, body) ->
@@ -75,6 +76,7 @@ describe 'Account', ->
                     'json':
                         'id':       'hsbc'
                         'type':     102
+                        'currency': 'GBP'
                         'category': 666
                     'headers':
                         'x-apikey': 'key:user:radek'
@@ -120,8 +122,9 @@ describe 'Account', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 109
+                        'id':       'hsbc'
+                        'type':     109
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -132,8 +135,9 @@ describe 'Account', ->
                         'method': 'POST'
                         'url': url + '/api/accounts'
                         'json':
-                            'id':   'hsbc'
-                            'type': 210
+                            'id':       'hsbc'
+                            'type':     210
+                            'currency': 'GBP'
                         'headers':
                             'x-apikey': 'key:user:radek'
                     , (err, res, body) ->
@@ -162,8 +166,9 @@ describe 'Account', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':         'hsbc'
-                        'type':       102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                         'difference': 15.67
                     'headers':
                         'x-apikey': 'key:user:radek'
@@ -179,12 +184,15 @@ describe 'Account', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -217,11 +225,14 @@ describe 'Account', ->
                             'hsbc': 5.67
                         'transactions': [
                             {
+                                'amount': 10.00
+                                'currency': 'GBP'
                                 'transfers':
                                     'user:radek': [
                                         {
                                             'amount':      -10.00
                                             'account_id':  'hsbc'
+                                            'currency':    'GBP'
                                             'description': 'Apple'
                                         }
                                     ]
@@ -252,8 +263,9 @@ describe 'Account', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':         'hsbc'
-                        'type':       102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                         'difference': 15.67
                     'headers':
                         'x-apikey': 'key:user:radek'
@@ -269,8 +281,9 @@ describe 'Account', ->
                     'method': 'PUT'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':         'hsbc'
-                        'type':       102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                         'difference': 25.67
                     'headers':
                         'x-apikey': 'key:user:radek'
@@ -300,6 +313,7 @@ describe 'Account', ->
                         'accounts':
                             'hsbc':
                                 'type':       102
+                                'currency':   'GBP'
                                 'difference': 25.67
 
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))

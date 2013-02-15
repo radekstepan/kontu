@@ -43,8 +43,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -59,11 +60,14 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -98,8 +102,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -114,12 +119,15 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': 'today'
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -154,8 +162,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -170,12 +179,15 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -183,6 +195,7 @@ describe 'Transaction', ->
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -217,8 +230,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -233,16 +247,20 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }, {
-                                    'amount':  -10.00
-                                    'test':   'azbest'
+                                    'amount':   -10.00
+                                    'currency': 'GBP'
+                                    'test':     'azbest'
                                 }
                             ]
                     'headers':
@@ -276,8 +294,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -292,12 +311,15 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -17.567
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -332,8 +354,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -348,12 +371,15 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      'seven'
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -388,8 +414,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -404,12 +431,15 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }
                             ]
@@ -442,11 +472,14 @@ describe 'Transaction', ->
                             'hsbc': -10
                         'transactions': [
                             {
+                                'amount': 10.00
+                                'currency': 'GBP'
                                 'transfers':
                                     'user:radek': [
                                         {
                                             'amount':      -10.00
                                             'account_id':  'hsbc'
+                                            'currency':    'GBP'
                                             'description': 'Apple'
                                         }
                                     ]
@@ -506,8 +539,9 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/accounts'
                     'json':
-                        'id':   'hsbc'
-                        'type': 102
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
                     'headers':
                         'x-apikey': 'key:user:radek'
                 , (err, res, body) ->
@@ -522,16 +556,20 @@ describe 'Transaction', ->
                     'method': 'POST'
                     'url': url + '/api/transactions'
                     'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
                         'created': (new Date()).getTime()
                         'transfers':
                             'user:radek': [
                                 {
                                     'amount':      -10.00
                                     'account_id':  'hsbc'
+                                    'currency':    'GBP'
                                     'description': 'Apple'
                                 }, {
                                     'amount':      4.00
                                     'account_id':  'user:barbora:debtor'
+                                    'currency':    'GBP'
                                     'description': 'Apple paid by Radek'
                                 }
                             ]
@@ -539,6 +577,7 @@ describe 'Transaction', ->
                                 {
                                     'amount':      -4.00
                                     'account_id':  'user:radek:creditor'
+                                    'currency':    'GBP'
                                     'description': 'Loan for Apple'
                                 }
                             ]
@@ -572,15 +611,19 @@ describe 'Transaction', ->
                             'user:barbora:debtor': 4
                         'transactions': [
                             {
+                                'amount': 10.00
+                                'currency': 'GBP'
                                 'transfers':
                                     'user:radek': [
                                         {
                                             'amount':      -10.00
                                             'account_id':  'hsbc'
+                                            'currency':    'GBP'
                                             'description': 'Apple'
                                         }, {
                                             'amount':      4.00
                                             'account_id':  'user:barbora:debtor'
+                                            'currency':    'GBP'
                                             'description': 'Apple paid by Radek'
                                         }
                                     ]
@@ -588,6 +631,7 @@ describe 'Transaction', ->
                                         {
                                             'amount':      -4.00
                                             'account_id':  'user:radek:creditor'
+                                            'currency':    'GBP'
                                             'description': 'Loan for Apple'
                                         }
                                     ]
@@ -616,15 +660,19 @@ describe 'Transaction', ->
                             'user:radek:creditor': -4
                         'transactions': [
                             {
+                                'amount': 10.00
+                                'currency': 'GBP'
                                 'transfers':
                                     'user:radek': [
                                         {
                                             'amount':      -10.00
                                             'account_id':  'hsbc'
+                                            'currency':    'GBP'
                                             'description': 'Apple'
                                         }, {
                                             'amount':      4.00
                                             'account_id':  'user:barbora:debtor'
+                                            'currency':    'GBP'
                                             'description': 'Apple paid by Radek'
                                         }
                                     ]
@@ -632,6 +680,7 @@ describe 'Transaction', ->
                                         {
                                             'amount':      -4.00
                                             'account_id':  'user:radek:creditor'
+                                            'currency':    'GBP'
                                             'description': 'Loan for Apple'
                                         }
                                     ]

@@ -2,6 +2,9 @@ Q = require 'q'
 
 class Kontu
 
+    # We understand these currencies.
+    currencies: [ 'USD', 'CZK', 'GBP', 'EUR' ]
+
     constructor: (@db) ->
 
     user: (service) =>

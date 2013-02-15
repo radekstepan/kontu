@@ -15,11 +15,11 @@ class Account
             @kontu.checkApi req.headers['x-apikey']
 
         # Check if doc matches the spec.
-        ).then( ([ user, collections ]) ->
+        ).then( ([ user, collections ]) =>
             # Does it have all the keys?
             account = req.body
             
-            for key in  [ 'id', 'type' ]
+            for key in  [ 'id', 'type', 'currency' ]
                 unless account[key] then throw "Need to provide account `#{key}`"
             
             # Do we have a difference?
@@ -31,8 +31,13 @@ class Account
             if parseFloat((parseFloat(account.difference)).toFixed(2)) isnt account.difference
                 throw "`#{account.difference}` is not correctly formatted"
             
+            # Do we know the account currency?
+            account.currency = account.currency.toUpperCase() # match on case
+            unless account.currency in @kontu.currencies
+                throw "Unknown currency `#{account.currency}`"
+
             # Key count?
-            unless Object.keys(account).length is 3 then throw "Provided incorrect number of keys"
+            unless Object.keys(account).length is 4 then throw "Provided incorrect number of keys"
 
             # Does the account exist already?
             if user.accounts[account.id] then throw "Account `#{account.id}` exists already"
@@ -43,6 +48,7 @@ class Account
             # Add it to the user object.
             user.accounts[account.id] =
                 'type':       account.type
+                'currency':   account.currency
                 'difference': account.difference
 
             [ user, collections ]
@@ -73,11 +79,11 @@ class Account
             @kontu.checkApi req.headers['x-apikey']
 
         # Check if doc matches the spec.
-        ).then( ([ user, collections ]) ->
+        ).then( ([ user, collections ]) =>
             # Does it have all the keys?
             account = req.body
             
-            for key in [ 'id', 'type' ]
+            for key in [ 'id', 'type', 'currency' ]
                 unless account[key] then throw "Need to provide account `#{key}`"
             
             # Do we have a difference?
@@ -89,8 +95,13 @@ class Account
             if parseFloat((parseFloat(account.difference)).toFixed(2)) isnt account.difference
                 throw "`#{account.difference}` is not correctly formatted"
             
+            # Do we know the account currency?
+            account.currency = account.currency.toUpperCase() # match on case
+            unless account.currency in @kontu.currencies
+                throw "Unknown currency `#{account.currency}`"
+
             # Key count?
-            unless Object.keys(account).length is 3 then throw "Provided incorrect number of keys"
+            unless Object.keys(account).length is 4 then throw "Provided incorrect number of keys"
 
             # Does the account not exist already?
             unless user.accounts[account.id] then throw "Account `#{account.id}` does not exist"
@@ -101,6 +112,7 @@ class Account
             # Replace it in the user object.
             user.accounts[account.id] =
                 'type':       account.type
+                'currency':   account.currency
                 'difference': account.difference
 
             [ user, collections ]
