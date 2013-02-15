@@ -1,5 +1,4 @@
 Q = require 'q'
-urlib = require 'url'
 
 class Account
 

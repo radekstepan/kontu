@@ -843,3 +843,124 @@ describe 'Transaction', ->
                         'transactions': []
 
             ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
+
+        it 'success updating a transaction', (done) ->
+            # Create user.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                        'currency': 'GBP'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+            
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':       'hsbc'
+                        'type':     102
+                        'currency': 'GBP'
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Post a new transaction.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/transactions'
+                    'json':
+                        'amount': 10.00
+                        'currency': 'GBP'
+                        'created': (new Date()).getTime()
+                        'transfers':
+                            'user:radek': [
+                                {
+                                    'amount':      -10.00
+                                    'account_id':  'hsbc'
+                                    'currency':    'GBP'
+                                    'description': 'Apple'
+                                }
+                            ]
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body.results.id
+                    else return def.reject body.message
+                def.promise
+
+            # Update the transaction.
+            ).then( (id) ->
+                def = Q.defer()
+                request
+                    'method': 'PUT'
+                    'url': url + "/api/transactions/#{id}"
+                    'json':
+                        'amount':   13.20
+                        'currency': 'EUR'
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            # Get a list of transactions for a user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'GET'
+                    'url': url + '/api/transactions'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if err then done err
+                    if res.statusCode is 200 then def.resolve body
+                    else return def.reject body.message
+                def.promise
+
+            ).then( (results) ->
+                # Does the response match?
+                expect(genericise results).to.deep.equal
+                    'results':
+                        'accounts':
+                            'hsbc':
+                                'type': 102
+                                'currency': 'GBP'
+                                'balance': -10
+                        'transactions': [
+                            {
+                                'amount': 13.20
+                                'currency': 'EUR'
+                                'transfers':
+                                    'user:radek': [
+                                        {
+                                            'amount':      -10.00
+                                            'account_id':  'hsbc'
+                                            'currency':    'GBP'
+                                            'description': 'Apple'
+                                        }
+                                    ]
+                            }
+                        ]
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))

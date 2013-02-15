@@ -42,6 +42,8 @@ class Kontu
             get: ->    transaction.get  @req, @res
 
             '/:id':
+                # Update a specific transaction.
+                put: (id) -> transaction.put @req, @res, id
                 # Delete a specific transaction.
                 delete: (id) -> transaction.delete @req, @res, id
 
