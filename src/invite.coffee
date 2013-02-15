@@ -36,13 +36,17 @@ class Invite
             if user1.accounts[user2.id + ':creditor']
                 throw "User #{user1.id} already has a creditor account with `#{user2.id}`"
             else
-                user1.accounts[user2.id + ':creditor'] = { 'type': 201 }
+                user1.accounts[user2.id + ':creditor'] =
+                    'type':       201
+                    'difference': 0
             
             # Check we do not have the debtor account already.
             if user2.accounts[user1.id + ':debtor']
                 throw "User #{user2.id} already has a debtor account with `#{user1.id}`"
             else
-                user2.accounts[user1.id + ':debtor'] = { 'type': 103 }
+                user2.accounts[user1.id + ':debtor'] =
+                    'type':       103
+                    'difference': 0
 
             # Insert the updated user.
             update = (user) ->

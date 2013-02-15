@@ -18,9 +18,22 @@ class Account
         ).then( ([ user, collections ]) ->
             # Does it have all the keys?
             account = req.body
+            
             for key in  [ 'id', 'type' ]
                 unless account[key] then throw "Need to provide account `#{key}`"
-            unless Object.keys(account).length is 2 then throw "Provided incorrect number of keys"
+            
+            # Do we have a difference?
+            account.difference ?= 0
+            # Is the amount an actual number?
+            unless not isNaN(parseFloat(account.difference)) and isFinite(account.difference)
+                throw "`#{account.difference}` is not a number"
+            # OK, is the amount a 'correct' number?
+            if parseFloat((parseFloat(account.difference)).toFixed(2)) isnt account.difference
+                throw "`#{account.difference}` is not correctly formatted"
+            
+            # Key count?
+            unless Object.keys(account).length is 3 then throw "Provided incorrect number of keys"
+
             # Does the account exist already?
             if user.accounts[account.id] then throw "Account `#{id}` exists already"
             # Does the type match the types we know about?
@@ -28,7 +41,9 @@ class Account
                 throw "Account type `#{account.type}` not known"
 
             # Add it to the user object.
-            user.accounts[account.id] = { 'type': account.type }
+            user.accounts[account.id] =
+                'type':       account.type
+                'difference': account.difference
 
             [ user, collections ]
 

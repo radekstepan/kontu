@@ -108,7 +108,7 @@ class Transaction
             accounts = {}
             for doc in docs
                 for t in doc.transfers[user.id]
-                    accounts[t.account_id] ?= 0
+                    accounts[t.account_id] ?= user.accounts[t.account_id].difference
                     accounts[t.account_id] += t.amount
             
             'accounts':     accounts

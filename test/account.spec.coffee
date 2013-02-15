@@ -1,4 +1,5 @@
 expect         = require('chai').expect
+Q              = require 'q'
 
 request        = require 'request'
 
@@ -138,3 +139,93 @@ describe 'Account', ->
                     , (err, res, body) ->
                         if res.statusCode isnt 200 then done()
                         else done new Error 'Success, is bad...'
+
+        it 'success adding account with a pre-existing amount', (done) ->
+            # Create user.
+            Q.fcall( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/users'
+                    'json':
+                        'id':      'user:radek'
+                        'api_key': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+            
+            # Create an account for the user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/accounts'
+                    'json':
+                        'id':         'hsbc'
+                        'type':       102
+                        'difference': 15.67
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Post a new transaction.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'POST'
+                    'url': url + '/api/transactions'
+                    'json':
+                        'created': (new Date()).getTime()
+                        'transfers':
+                            'user:radek': [
+                                {
+                                    'amount':      -10.00
+                                    'account_id':  'hsbc'
+                                    'description': 'Apple'
+                                }
+                            ]
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            # Get a list of transactions for a user.
+            ).then( ->
+                def = Q.defer()
+                request
+                    'method': 'GET'
+                    'url': url + '/api/transactions'
+                    'json': {}
+                    'headers':
+                        'x-apikey': 'key:user:radek'
+                , (err, res, body) ->
+                    if res.statusCode is 200 then def.resolve body
+                    else def.reject body.message
+                def.promise
+
+            ).then( (results) ->
+                # Does the response match?
+                expect(genericise results).to.deep.equal
+                    'results':
+                        'accounts':
+                            'hsbc': 5.67
+                        'transactions': [
+                            {
+                                'transfers':
+                                    'user:radek': [
+                                        {
+                                            'amount':      -10.00
+                                            'account_id':  'hsbc'
+                                            'description': 'Apple'
+                                        }
+                                    ]
+                            }
+                        ]
+
+            ).done(( -> done() ), ( (msg) -> done new Error(msg) ))
