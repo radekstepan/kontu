@@ -9,8 +9,3 @@ module.exports = class LedgerView extends View
     autoRender:      true
 
     getTemplateFunction: -> require 'chaplin/templates/ledger'
-
-    afterRender: ->
-        super
-
-        $(@el).foundationCustomForms()

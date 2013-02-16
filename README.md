@@ -1,4 +1,8 @@
-# Kontu
+# Kontu API
+
+A web service for a ledger based budgetting app using MongoDB as a data store.
+
+## Quickstart
 
 To run the app in `ukraine` cloud:
 
