@@ -2,6 +2,8 @@
 
 A web service for a ledger based budgetting app using MongoDB as a data store.
 
+[ ![Codeship Status for radekstepan/kontu](https://www.codeship.io/projects/98ac3c10-6f12-0130-b089-22000a9d02dd/status?branch=master)](https://www.codeship.io/projects/1945)
+
 ## Quickstart
 
 To run the app in `ukraine` cloud:
